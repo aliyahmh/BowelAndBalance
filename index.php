@@ -28,7 +28,7 @@
             <div class="home-head-container">
                 <div class="logo-area">
                     <img src="../IMAGES/logo.png" alt="Logo" class="main-logo">
-                    <span class="app-name">Bowl && Balance</span>
+                    <span class="app-name">Bowl & Balance</span>
                 </div>
 
                 <div class="home-contact-container">
