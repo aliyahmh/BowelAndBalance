@@ -55,7 +55,7 @@
 
                 <div class="action-area">
                     <a href="login.php" class="btn-login">Log-in to Explore</a>
-                    <p class="signup-text">New User? <a href="signup.php">Sign-up here</a></p>
+                    <p class="signup-text">New User? <a href="SignUp.php">Sign-up here</a></p>
                 </div>
             </div>
         </section>
