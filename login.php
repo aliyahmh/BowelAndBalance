@@ -45,7 +45,7 @@
             <button type="submit" class="auth-button" id="admin-submit">Admin</button>
 
             <p class="auth-link">
-                Don't have an account? <a href="signup.html">Sign up here</a>
+                Don't have an account? <a href="signup.php">Sign up here</a>
             </p>
         </form>
     </main>

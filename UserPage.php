@@ -77,7 +77,7 @@
 
         <!-- My Recipes Section -->
         <section class="up-stats">
-            <h2 class="section-title"><a href="MyRecipe.html" class="my-recipes">My Recipes</a></h2>
+            <h2 class="section-title"><a href="MyRecipe.php" class="my-recipes">My Recipes</a></h2>
             <div class="stats-grid">
                 <div class="up-stat-card">
                     <div class="up-stat-icon"><img src="IMAGES/book.png" alt=""></div>
