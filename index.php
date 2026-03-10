@@ -27,7 +27,7 @@
         <nav class="home-head">
             <div class="home-head-container">
                 <div class="logo-area">
-                    <img src="../IMAGES/logo.png" alt="Logo" class="main-logo">
+                    <img src="IMAGES/logo.png" alt="Logo" class="main-logo">
                     <span class="app-name">Bowl & Balance</span>
                 </div>
 
@@ -54,8 +54,8 @@
                 <p class="hero-subtitle">Your journey to a tastier, healthier lifestyle starts with a single bowl.</p>
 
                 <div class="action-area">
-                    <a href="login.html" class="btn-login">Log-in to Explore</a>
-                    <p class="signup-text">New User? <a href="signup.html">Sign-up here</a></p>
+                    <a href="login.php" class="btn-login">Log-in to Explore</a>
+                    <p class="signup-text">New User? <a href="signup.php">Sign-up here</a></p>
                 </div>
             </div>
         </section>

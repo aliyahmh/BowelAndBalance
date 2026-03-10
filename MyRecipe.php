@@ -66,7 +66,7 @@
 <tr>
   <td >
     <a href="ViewRecipe.php">Acai Bowl</a>
-    <a href="ViewRecipe.php"> <img class="bd-MyRecipePhoto" src="IMAGES/Acai Bowl_3.png"></a>
+    <a href="ViewRecipe.php"> <img class="bd-MyRecipePhoto" src="IMAGES/Recipe_3.png"></a>
   </td>
 
   <td>
@@ -138,7 +138,7 @@
 <tr>
   <td>
     <a href="ViewRecipe.php">Banana Granola</a>
-    <a href="ViewRecipe.php"> <img  class="bd-MyRecipePhoto" src="IMAGES/Banana Granola.png"></a>
+    <a href="ViewRecipe.php"> <img  class="bd-MyRecipePhoto" src="IMAGES/Recipe_2.png"></a>
   </td>
 
   <td>
