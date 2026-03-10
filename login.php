@@ -45,7 +45,7 @@
             <button type="submit" class="auth-button" id="admin-submit">Admin</button>
 
             <p class="auth-link">
-                Don't have an account? <a href="signup.php">Sign up here</a>
+                Don't have an account? <a href="SignUp.php">Sign up here</a>
             </p>
         </form>
     </main>
@@ -55,7 +55,7 @@
     <footer class="page-footer">
         <div class="footer-container">
             <div class="footer-content">
-                <div class="footer-links">
+                <div class="footer-links"> 
                     <a href="mailto:contact@bowlandbalance.com" class="footer-link">
                         <span class="footer-icon">📧</span>
                         contact@bowlandbalance.com
