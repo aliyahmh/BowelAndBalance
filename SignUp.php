@@ -1,7 +1,8 @@
 <?php
-// put your code here
-        
+session_start();
+
 ?>
+       
 
 <!DOCTYPE html>
 <html>
@@ -34,8 +35,16 @@
 
 
     <main class="auth-container">
-        <form action="" method="POST" class="auth-form" id="signup-form">
+        <form action="signup_process.php" method="POST" class="auth-form" id="signup-form" enctype="multipart/form-data">
             <h1>Create Account</h1>
+            <?php
+            if (isset($_GET['error'])) {
+                if ($_GET['error'] === 'email_exists')
+                    echo "<p style='color:red;'>This email is already registered.</p>";
+                elseif ($_GET['error'] === 'email_blocked')
+                    echo "<p style='color:red;'>This account has been blocked.</p>";
+            }
+            ?>
 
 
             <div class="form-group">
@@ -69,7 +78,7 @@
                 <div class="form-group">
                     <label for="file-upload"> Profile Image: </label>
                     <input id="file-upload" name="file-upload" type="text" placeholder="Chossen File" readonly>
-                    <input type="file" id="profile-img" accept="image/*"><br>
+                    <input type="file" id="profile-img" name="photo" accept="image/*"><br>
                 </div>
 
             </div>

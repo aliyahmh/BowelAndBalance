@@ -1,6 +1,17 @@
 <?php
-// put your code here
-        
+session_start();
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if regular admin (not user)
+if ($_SESSION['userType'] !== 'admin') {
+    header("Location: login.php?error=unauthorized");
+    exit;
+}        
 ?>
 
 <!DOCTYPE html>
@@ -29,7 +40,7 @@
                 <span class="logo-text">Bowl & Balance</span>
             </div>
             <div class="header-right">
-                <a href="index.php" class="header-signout">Sign Out</a>
+                <a href="signout_process.php" class="header-signout">Sign Out</a>
             </div>
         </div>
     </header>
