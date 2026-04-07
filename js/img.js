@@ -39,17 +39,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-     const signSubmitBtn = document.getElementById('sign-submit');
-    const signUpForm = document.getElementById('signup-form');
-
-    signSubmitBtn.addEventListener('click', (event) => {
-        
-        if (signUpForm.checkValidity()) {
-            event.preventDefault();
-            window.location.href = 'UserPage.php';
-        } else {
-            // This triggers the native browser popups (e.g., "Please fill out this field")
-            signUpForm.reportValidity();
-        }
-    });
+    
 });

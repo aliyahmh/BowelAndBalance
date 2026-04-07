@@ -2,17 +2,20 @@
 
 $host = "localhost";
 $db = "recipe_db";
-$user = "root";
-$pass = "root";
 
-$conn = mysqli_connect($host, $user, $pass, $db, 8889);
+try {
 
-$error = mysqli_connect_error();
-
-if ($error != null) {
-    die("Connection failed: " . $conn->connect_error);
+    $connectionString = "mysql:host=$host;dbname=$db";
+    $user = "root";
+    $pass = "root";
+    $pdo = new PDO($connectionString, $user, $pass);
+    
+    
+    // error & fetch mode
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    
+} catch (PDOException $ex) {
+    die($ex->getMessage());
 }
- else {
-    echo 'success!';
- }
 ?>

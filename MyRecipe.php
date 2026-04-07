@@ -1,6 +1,17 @@
 <?php
-// put your code here
-        
+session_start();
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if regular user (not admin)
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: login.php?error=unauthorized");
+    exit;
+}        
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +44,7 @@
                     <a href="Recipes.php" class="nav-link">Recipes</a>
                     <a href="MyRecipe.php" class="nav-link">My Recipes</a>
                 </nav>
-                <a href="index.php" class="header-signout">Sign Out</a>
+                <a href="signout_process.php" class="header-signout">Sign Out</a>
           </div>
       </div>
   </header>

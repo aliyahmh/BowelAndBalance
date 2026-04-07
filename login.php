@@ -1,6 +1,6 @@
-<?php
-// put your code here
-        
+<?php 
+session_start();
+
 ?>
 
 <!DOCTYPE html>
@@ -29,8 +29,16 @@
     </header>
 
     <main class="auth-container">
-        <form action="" method="POST" class="auth-form" id="login-form">
+        <form action="login_process.php" method="POST" class="auth-form" id="login-form">
             <h1>Login</h1>
+            <?php
+            if (isset($_GET['error'])) {
+                if ($_GET['error'] === 'blocked')
+                    echo "<p style='color:red;'>Sorry, this account has been blocked.</p>";
+                elseif ($_GET['error'] === 'invalid')
+                    echo "<p style='color:red;'>Invalid email or password.</p>";
+            }
+            ?>
 
             <div class="form-group">
                 <label for="email">Email:</label>
@@ -41,8 +49,7 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="auth-button" id="user-submit">User</button>
-            <button type="submit" class="auth-button" id="admin-submit">Admin</button>
+            <button type="submit" class="auth-button" id="user-submit">Log In</button>
 
             <p class="auth-link">
                 Don't have an account? <a href="SignUp.php">Sign up here</a>
