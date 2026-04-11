@@ -5,7 +5,7 @@ $db = "recipe_db";
 
 try {
 
-    $connectionString = "mysql:host=$host;dbname=$db";
+    $connectionString = "mysql:host=$host;port=8889;dbname=$db";
     $user = "root";
     $pass = "root";
     $pdo = new PDO($connectionString, $user, $pass);
