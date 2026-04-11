@@ -1,5 +1,11 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 session_start();
+
+
+require_once 'db_connect.php';
 
 // check if logged in
 if (!isset($_SESSION['userID'])) {
@@ -15,7 +21,7 @@ if ($_SESSION['userType'] !== 'admin') {
 // Retrive Admin info
 $adminID = $_SESSION['userID'];
 try {
-    $stmt = $pdo->prepare("SELECT * FROM user WHERE userID = :id");
+    $stmt = $pdo->prepare("SELECT * FROM user WHERE id = :id");
     $stmt->bindValue(':id', $adminID);
     $stmt->execute();
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -24,12 +30,16 @@ try {
 }
 
 // Retrieve Reports and Blocked Users
-$reports = $pdo->query("SELECT r.*, rec.recipeName, u.firstName, u.lastName 
-                        FROM report r 
-                        JOIN recipe rec ON r.recipeID = rec.recipeID 
-                        JOIN user u ON rec.userID = u.userID")->fetchAll(PDO::FETCH_ASSOC);
-
-$blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $reportSQL = "SELECT r.*, rec.name AS recipeName, u.firstName, u.lastName, u.photoFileName
+                  FROM report r 
+                  JOIN recipe rec ON r.recipeID = rec.id 
+                  JOIN user u ON rec.userID = u.id";
+    $reports = $pdo->query($reportSQL)->fetchAll(PDO::FETCH_ASSOC);
+    $blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Data retrieval error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +88,7 @@ $blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_AS
                     <h2 class="section-title">Profile Information</h2>
                     <div class="profile-grid">
                         <!-- Profile Picture -->
-                        <img src="IMAGES/<?php echo $admin['profilePic']; ?>" alt="profile picture" class="profile-photo">
+                        <img src="IMAGES/<?php echo $admin['photoFileName']; ?>" alt="profile picture" class="profile-photo">
 
                         <!-- Profile Details -->
                         <div class="profile-details">
@@ -91,7 +101,7 @@ $blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_AS
                             <!-- 2. Email Address -->
                             <div class="detail-item">
                                 <div class="detail-label">Email Address</div>
-                                <div class="detail-value"><?php echo $admin['email']; ?></div>
+                                <div class="detail-value"><?php echo $admin['emailAddress']; ?></div>
                             </div>
 
                         </div>
@@ -118,12 +128,13 @@ $blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_AS
                         </div>
 
                         <div class="creator-info">
+                            <img src="IMAGES/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
                             <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
                         </div>
 
                         <form action="handle_report.php" method="POST" class="action-form">
                             <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
-                            <input type="hidden" name="reportID" value="<?php echo $report['reportID']; ?>">
+                            <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
 
                             <div class="radio-group">
                                 <label><input type="radio" name="action" value="block" checked> Block User</label>
@@ -148,8 +159,8 @@ $blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_AS
                 <tbody>
                     <?php foreach ($blockedUsers as $user): ?>
                         <tr>
-                            <td><?php echo $user['name']; ?></td>
-                            <td><?php echo $user['email']; ?></td>
+                            <td><?php echo $user['firstName']; ?></td>
+                            <td><?php echo $user['emailAddress']; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
