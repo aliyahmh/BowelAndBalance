@@ -11,74 +11,92 @@ if (!isset($_SESSION['userID'])) {
 if ($_SESSION['userType'] !== 'admin') {
     header("Location: login.php?error=unauthorized");
     exit;
-}        
+}
+// Retrive Admin info
+$adminID = $_SESSION['userID'];
+try {
+    $stmt = $pdo->prepare("SELECT * FROM user WHERE userID = :id");
+    $stmt->bindValue(':id', $adminID);
+    $stmt->execute();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching admin info: " . $e->getMessage());
+}
+
+// Retrieve Reports and Blocked Users
+$reports = $pdo->query("SELECT r.*, rec.recipeName, u.firstName, u.lastName 
+                        FROM report r 
+                        JOIN recipe rec ON r.recipeID = rec.recipeID 
+                        JOIN user u ON rec.userID = u.userID")->fetchAll(PDO::FETCH_ASSOC);
+
+$blockedUsers = $pdo->query("SELECT * FROM blockeduser")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Bowl & Balance | Admin Dashboard</title>
-    <link rel="stylesheet" href="MergedStyle.css">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> Bowl & Balance | Admin Dashboard</title>
+        <link rel="stylesheet" href="MergedStyle.css">
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
 
-<body id="hr-body">
-    <!-- Header -->
-    <header class="page-header">
-        <div class="header-content">
-            <div class="header-logo">
-                <img src="IMAGES/logo.png" alt="Bowl & Balance Logo" class="logo-img">
-                <span class="logo-text">Bowl & Balance</span>
-            </div>
-            <div class="header-right">
-                <a href="signout_process.php" class="header-signout">Sign Out</a>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <div class="user-container">
-            <!-- Welcome Section -->
-            <section class="welcome-section">
-                <h1 class="welcome-note">Hey there, Aroub!</h1>
-                <!-- <p style="font-size: 1.2rem; color: #666; max-width: 800px;">
-                Here's your personalized dashboard with all your recipes, favorites, and profile information.
-            </p> -->
-            </section>
-
-            <!-- Profile Information Section -->
-            <section class="hr-profile-section">
-                <h2 class="section-title">Profile Information</h2>
-                <div class="profile-grid">
-                    <!-- Profile Picture -->
-                    <img src="IMAGES/layla.jpg" alt="profile picture" class="profile-photo">
-
-                    <!-- Profile Details -->
-                    <div class="profile-details">
-                        <!-- 1. Name -->
-                        <div class="detail-item">
-                            <div class="detail-label">Full Name</div>
-                            <div class="detail-value">Aroub Alswayyed</div>
-                        </div>
-
-                        <!-- 2. Email Address -->
-                        <div class="detail-item">
-                            <div class="detail-label">Email Address</div>
-                            <div class="detail-value">aroub.alswayyed@example.com</div>
-                        </div>
-                        
-                    </div>
+    <body id="hr-body">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-content">
+                <div class="header-logo">
+                    <img src="IMAGES/logo.png" alt="Bowl & Balance Logo" class="logo-img">
+                    <span class="logo-text">Bowl & Balance</span>
                 </div>
-        </div>
+                <div class="header-right">
+                    <a href="signout_process.php" class="header-signout">Sign Out</a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="user-container">
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <h1 class="welcome-note">Hey there, <?php echo $admin['firstName']; ?>!</h1>
+                    <!-- <p style="font-size: 1.2rem; color: #666; max-width: 800px;">
+                    Here's your personalized dashboard with all your recipes, favorites, and profile information.
+                </p> -->
+                </section>
+
+                <!-- Profile Information Section -->
+                <section class="hr-profile-section">
+                    <h2 class="section-title">Profile Information</h2>
+                    <div class="profile-grid">
+                        <!-- Profile Picture -->
+                        <img src="IMAGES/<?php echo $admin['profilePic']; ?>" alt="profile picture" class="profile-photo">
+
+                        <!-- Profile Details -->
+                        <div class="profile-details">
+                            <!-- 1. Name -->
+                            <div class="detail-item">
+                                <div class="detail-label">Full Name</div>
+                                <div class="detail-value"><?php echo $admin['firstName'] . " " . $admin['lastName']; ?></div>
+                            </div>
+
+                            <!-- 2. Email Address -->
+                            <div class="detail-item">
+                                <div class="detail-label">Email Address</div>
+                                <div class="detail-value"><?php echo $admin['email']; ?></div>
+                            </div>
+
+                        </div>
+                    </div>
+            </div>
         </section>
 
 
@@ -88,64 +106,34 @@ if ($_SESSION['userType'] !== 'admin') {
         <section class="moderation-feed">
             <h2>Pending Recipe Reports</h2>
 
-            <div class="feed-item">
-                <div class="recipe-details">
-                    <a href="ViewRecipe.php" class="recipe-link"> Poke Bowl </a>
+            <?php if (empty($reports)): ?>
+                <p>No pending reports at this time.</p>
+            <?php else: ?>
+                <?php foreach ($reports as $report): ?>
+                    <div class="feed-item">
+                        <div class="recipe-details">
+                            <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
+                                <?php echo $report['recipeName']; ?>
+                            </a>
+                        </div>
 
-                </div>
+                        <div class="creator-info">
+                            <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
+                        </div>
 
-                <div class="creator-info">
-                    <img src="IMAGES/Sara.jpg" alt="Creator Photo" class="avatar">
-                    <span>By: <strong>Joud BinFaris</strong></span>
-                </div>
+                        <form action="handle_report.php" method="POST" class="action-form">
+                            <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
+                            <input type="hidden" name="reportID" value="<?php echo $report['reportID']; ?>">
 
-                <form action="" class="action-form">
-                    <div class="radio-group">
-                        <label><input type="radio" name="action" checked> Block User</label>
-                        <label><input type="radio" name="action"> Dismiss</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="action" value="block" checked> Block User</label>
+                                <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
+                            </div>
+                            <button type="submit" class="submit-btn">Submit Action</button>
+                        </form>
                     </div>
-                    <button type="submit" class="submit-btn">Submit Action</button>
-                </form>
-            </div>
-
-            <div class="feed-item">
-                <div class="recipe-details">
-                    <a href="ViewRecipe.php" class="recipe-link">Acai Bowl</a>
-
-                </div>
-
-                <div class="creator-info">
-                    <img src="IMAGES/Lina.jpg" alt="Creator Photo" class="avatar">
-                    <span>By: <strong>Sara Abdullah</strong></span>
-                </div>
-
-                <form action="" class="action-form">
-                    <div class="radio-group">
-                        <label><input type="radio" name="action" checked> Block User</label>
-                        <label><input type="radio" name="action"> Dismiss</label>
-                    </div>
-                    <button type="submit" class="submit-btn">Submit Action</button>
-                </form>
-            </div>
-            <div class="feed-item">
-                <div class="recipe-details">
-                    <a href="ViewRecipe.php" class="recipe-link">Chicken Curry </a>
-
-                </div>
-
-                <div class="creator-info">
-                    <img src="IMAGES/mona.jpg" alt="Creator Photo" class="avatar">
-                    <span>By: <strong>Sami Omar</strong></span>
-                </div>
-
-                <form action="" class="action-form">
-                    <div class="radio-group">
-                        <label><input type="radio" name="action" checked> Block User</label>
-                        <label><input type="radio" name="action"> Dismiss</label>
-                    </div>
-                    <button type="submit" class="submit-btn">Submit Action</button>
-                </form>
-            </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </section>
 
         <section class="blocked-list">
@@ -158,18 +146,12 @@ if ($_SESSION['userType'] !== 'admin') {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Ahmad Saeed</td>
-                        <td>ahmadsaeed@email.com</td>
-                    </tr>
-                    <tr>
-                        <td>Omar Youssef</td>
-                        <td>omaryoussef@email.com</td>
-                    </tr>
-                    <tr>
-                        <td>Huda Ibrahim</td>
-                        <td>hudaibrahim@email.com</td>
-                    </tr>
+                    <?php foreach ($blockedUsers as $user): ?>
+                        <tr>
+                            <td><?php echo $user['name']; ?></td>
+                            <td><?php echo $user['email']; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </section>
