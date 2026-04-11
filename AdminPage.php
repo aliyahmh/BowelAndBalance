@@ -134,7 +134,7 @@ try {
 
                         <form action="handle_report.php" method="POST" class="action-form">
                             <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
-                            <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
+                            <input type="hidden" name="reportID" value="<?php echo $report['reportID']; ?>">
 
                             <div class="radio-group">
                                 <label><input type="radio" name="action" value="block" checked> Block User</label>
