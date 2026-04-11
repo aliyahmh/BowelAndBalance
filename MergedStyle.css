@@ -951,7 +951,6 @@ div.container {
     transform: scale(1.08);
 }
 
-
 /*-----------------------------------------------------Add Recipe page & Edit Recipe page-----------------------------------------------------------*/
 
 
@@ -1362,12 +1361,6 @@ label {
   border: 1px solid rgba(3, 59, 47, 0.12);
   box-shadow: 0 6px 16px rgba(3, 59, 47, 0.08);
 }
-
-
-
-
-
-
 
 /*
    RESPONSIVE 
@@ -1796,6 +1789,21 @@ background-position: center;
 }
 
 
+/* Empty state message */
+#bd-no-recipes-msg {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: rgb(1, 35, 28);
+    margin: 60px auto;
+    padding: 30px 40px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(3, 59, 47, 0.1);
+    max-width: 500px;
+    font-family: 'Inter', system-ui, sans-serif;
+}
 
 /*----------------------------------------------------------login page-------------------------------------------*/
 #auth-body {

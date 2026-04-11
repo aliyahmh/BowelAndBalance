@@ -31,25 +31,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $pdo->query("
             SELECT r.id, r.name, r.photoFileName,
-                   rc.categoryName,
-                   COUNT(l.recipeID) AS totalLikes
-            FROM Recipe r
-            JOIN RecipeCategory rc ON r.categoryID = rc.id
-            LEFT JOIN Likes l ON l.recipeID = r.id
-            GROUP BY r.id, r.name, r.photoFileName, rc.categoryName
+       rc.categoryName,
+       CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
+       u.photoFileName AS creatorPhoto,
+       COUNT(l.recipeID) AS totalLikes
+       FROM Recipe r
+       JOIN RecipeCategory rc ON r.categoryID = rc.id
+       JOIN User u ON r.userID = u.id
+       LEFT JOIN Likes l ON l.recipeID = r.id
+       GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName, u.photoFileName
         ");
     } else {
 
         // Prepared statement to filter recipes by category
         $stmt = $pdo->prepare("
             SELECT r.id, r.name, r.photoFileName,
-                   rc.categoryName,
-                   COUNT(l.recipeID) AS totalLikes
-            FROM Recipe r
-            JOIN RecipeCategory rc ON r.categoryID = rc.id
-            LEFT JOIN Likes l ON l.recipeID = r.id
-            WHERE r.categoryID = :catID
-            GROUP BY r.id, r.name, r.photoFileName, rc.categoryName
+       rc.categoryName,
+       CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
+       u.photoFileName AS creatorPhoto,
+       COUNT(l.recipeID) AS totalLikes
+FROM Recipe r
+JOIN RecipeCategory rc ON r.categoryID = rc.id
+JOIN User u ON r.userID = u.id
+LEFT JOIN Likes l ON l.recipeID = r.id
+WHERE r.categoryID = :catID
+GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName, u.photoFileName
         ");
 
         $stmt->execute([':catID' => $selectedCat]);
@@ -58,13 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // GET request — retrieve ALL recipes from the database
     $stmt = $pdo->query("
-        SELECT r.id, r.name, r.photoFileName,
-               rc.categoryName,
-               COUNT(l.recipeID) AS totalLikes
-        FROM Recipe r
-        JOIN RecipeCategory rc ON r.categoryID = rc.id
-        LEFT JOIN Likes l ON l.recipeID = r.id
-        GROUP BY r.id, r.name, r.photoFileName, rc.categoryName
+       SELECT r.id, r.name, r.photoFileName,
+       rc.categoryName,
+       CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
+       u.photoFileName AS creatorPhoto,
+       COUNT(l.recipeID) AS totalLikes
+FROM Recipe r
+JOIN RecipeCategory rc ON r.categoryID = rc.id
+JOIN User u ON r.userID = u.id
+LEFT JOIN Likes l ON l.recipeID = r.id
+GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName, u.photoFileName
     ");
 
     $selectedCat = '';
@@ -86,6 +95,21 @@ $recipes = $stmt->fetchAll();
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
+            }
+
+            /* No recipes found message */
+            .ar-empty {
+                grid-column: 1 / -1;
+                text-align: center;
+                font-size: 22px;
+                font-weight: 800;
+                color: rgb(1, 35, 28);
+                padding: 40px 50px;
+                border-radius: 24px;
+                background: rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(20px);
+                box-shadow: 0 8px 32px rgba(4, 59, 3, 0.12);
+                letter-spacing: -0.5px;
             }
         </style>
     </head>
@@ -153,7 +177,7 @@ $recipes = $stmt->fetchAll();
 // Check if any recipes were returned
                 if (count($recipes) === 0):
                     ?>
-                    <p>No recipes found.</p>
+                    <p class="ar-empty">No recipes found.</p>
 
                 <?php else: ?>
 
@@ -189,6 +213,19 @@ $recipes = $stmt->fetchAll();
                                         </a>
                                     </p>
 
+
+
+                                      <!-- Creator -->
+                                      <div class="ar-line ar-maker">
+                                                  <span class="ar-key">Creator:</span>
+
+                                              <div class="ar-makerContent">
+                                                  <img class="ar-makerImg"
+                                                       src="IMAGES/<?php echo $recipe['creatorPhoto']; ?>">
+
+                                                  <span><?php echo $recipe['creatorName']; ?></span>
+                                              </div>
+                                        </div>
                                     <!-- Total likes counted from Likes table -->
                                     <p class="ar-line">
                                         <span class="ar-key">Total likes:</span>
