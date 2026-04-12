@@ -1,54 +1,86 @@
-<?php
+<?php 
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+session_start();
 
-require_once 'db_connect.php'; 
-
-if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
-    $recipeID = $_POST['recipeID'];
-    $reportID = $_POST['reportID'];
-    $action = $_POST['action'];
-
-    if ($action === 'block') {
-        try {
-            // 1. Identify the user who created the reported recipe
-            $stmt = $pdo->prepare("SELECT userID FROM recipe WHERE id = ?");
-            $stmt->execute([$recipeID]);
-            $user = $stmt->fetch();
-            $targetUID = $user['userID'];
-
-            // 2. Fetch user details using your specific column names
-            $stmt = $pdo->prepare("SELECT firstName, lastName, emailAddress FROM user WHERE id = ?");
-            $stmt->execute([$targetUID]);
-            $uDetails = $stmt->fetch();
-
-            $pdo->beginTransaction();
-
-            // 3. Delete associated data
-            $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
-            
-            // 4. Delete all recipes belonging to this user [Requirement 11c]
-            $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
-
-            // 5. INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
-            $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
-            $stmt->execute([
-                $uDetails['firstName'], 
-                $uDetails['lastName'], 
-                $uDetails['emailAddress']
-            ]);
-
-            // 6. Delete from main user table
-            $pdo->prepare("DELETE FROM user WHERE id = ?")->execute([$targetUID]);
-            
-            $pdo->commit();
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            die("Transaction failed: " . $e->getMessage()); 
-        }
-    }
-
-    // 7. Delete the report and return to dashboard [Requirement 11c]
-    $pdo->prepare("DELETE FROM report WHERE id = ?")->execute([$reportID]);
-    header("Location: AdminPage.php");
-    exit();
-}
 ?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bowl & Balance | Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="MergedStyle.css">
+    <script src="js/sub.js"></script>
+    
+</head>
+
+<body id="auth-body">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="IMAGES/logo.png" alt="Bowl & Balance Logo" class="logo-img">
+                <span class="logo-text">Bowl & Balance</span>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <form action="login_process.php" method="POST" class="auth-form" id="login-form">
+            <h1>Login</h1>
+            <?php
+            if (isset($_GET['error'])) {
+                if ($_GET['error'] === 'blocked')
+                    echo "<p style='color:red;'>Sorry, this account has been blocked.</p>";
+                elseif ($_GET['error'] === 'invalid')
+                    echo "<p style='color:red;'>Invalid email or password.</p>";
+            }
+            ?>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="auth-button" id="user-submit">Log In</button>
+
+            <p class="auth-link">
+                Don't have an account? <a href="SignUp.php">Sign up here</a>
+            </p>
+        </form>
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-links"> 
+                    <a href="mailto:contact@bowlandbalance.com" class="footer-link">
+                        <span class="footer-icon">📧</span>
+                        contact@bowlandbalance.com
+                    </a>
+                    <a href="tel:+966501234567" class="footer-link">
+                        <span class="footer-icon">📞</span>
+                        +966 50 123 4567
+                    </a>
+                    <a href="https://x.com/bowlandbalance" target="_blank" class="footer-link">
+                        <span class="footer-icon">𝕏</span>
+                        @bowlandbalance
+                    </a>
+                </div>
+                <div class="footer-copyright">
+                    <p>&copy; 2026 Bowl & Balance. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
