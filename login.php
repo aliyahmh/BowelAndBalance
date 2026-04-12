@@ -1,6 +1,5 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+
 require_once 'db_connect.php'; 
 
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
