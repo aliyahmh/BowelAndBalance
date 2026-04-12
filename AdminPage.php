@@ -1,9 +1,7 @@
 <?php
-
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 session_start();
-
 
 require_once 'db_connect.php';
 
@@ -132,9 +130,9 @@ try {
                             <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
                         </div>
 
-                        <form action="handle_report.php" method="POST" class="action-form">
+                        <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
                             <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
-                            <input type="hidden" name="reportID" value="<?php echo $report['reportID']; ?>">
+                            <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
 
                             <div class="radio-group">
                                 <label><input type="radio" name="action" value="block" checked> Block User</label>
@@ -193,6 +191,22 @@ try {
         </div>
     </footer>
 
+    <script>
+        function confirmAction(form) {
+            // Determine which radio button was selected
+            const action = form.querySelector('input[name="action"]:checked').value;
+
+            let message = "";
+            if (action === "block") {
+                message = "Are you sure you want to BLOCK this user? This will delete all their recipes and account data permanently.";
+            } else {
+                message = "Are you sure you want to DISMISS this report?";
+            }
+
+            // confirm() returns true if user clicks 'OK', false if they click 'Cancel'
+            return confirm(message);
+        }
+    </script>
 </body>
 
 </html>
