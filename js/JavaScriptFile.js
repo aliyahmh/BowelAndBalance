@@ -260,11 +260,7 @@ if (page.includes("editrecipe")) {
     list.appendChild(row);
   }
 
-  addIngredientRow("Yogurt", "1cup");
-  addIngredientRow("Mixed Berry", "1/2 cup");
-  addIngredientRow("Honey / Maple Syrup", "1 tablespoon");
-  addIngredientRow("Granola", "2 tablespoons");
-  addIngredientRow("Mint leaves", "few leaves");
+  
 
   if (addBtn) {
     addBtn.onclick = function () {
@@ -315,13 +311,7 @@ if (page.includes("editrecipe")) {
     stepsList.appendChild(row);
   }
 
-  addStepRow("Add the yogurt to a serving bowl");
-  addStepRow("Wash and cut the berries if needed");
-  addStepRow("Place the mixed berries on top of the yogurt");
-  addStepRow("Drizzle honey or maple syrup over the bowl");
-  addStepRow("Sprinkle granola for extra crunch");
-  addStepRow("Garnish with mint leaves if desired");
-  addStepRow("Serve immediately and enjoy");
+ 
 
   if (addStepBtn) {
     addStepBtn.onclick = function () {

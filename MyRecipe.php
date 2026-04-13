@@ -132,10 +132,10 @@ function getLikeCount(PDO $pdo, int $recipeID): int {
                                                 <?= htmlspecialchars($recipe['name']) ?>
                                     </a>
                                     <a href="ViewRecipe.php?id=<?= htmlspecialchars($recipeID) ?>">
-                                        <img class="bd-MyRecipePhoto"
-                                             src="IMAGES/<?= htmlspecialchars($recipe['photoFileName']) ?>"
-                                             alt="<?= htmlspecialchars($recipe['name']) ?>">
-                                    </a>
+    <img class="bd-MyRecipePhoto"
+         src="uploads/images/<?= htmlspecialchars($recipe['photoFileName']) ?>"
+         alt="<?= htmlspecialchars($recipe['name']) ?>">
+</a>
                                 </td>
 
                                 <!-- Ingredients -->

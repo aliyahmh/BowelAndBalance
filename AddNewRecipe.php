@@ -63,20 +63,13 @@ try {
         <h3 id="bd-second-heading">Reach out and we will get in touch within 24 hours,</h3>
 
         <!-- recipe form -->
-        <!-- changed method to POST -->
-        <!-- changed action to process page -->
-        <!-- added enctype because the form contains file upload -->
         <form id="bd-addRecipeForm" method="post" action="add_recipe_process.php" enctype="multipart/form-data">
 
             <div id="bd-container1-div">
                 <label>Recipe Name:</label>
-
-                <!-- added name so PHP can receive the recipe name -->
                 <input type="text" id="bd-name" name="name" placeholder="input recipe name">
 
                 <label>Category:</label>
-
-                <!-- categories are loaded dynamically from RecipeCategory table -->
                 <select id="bd-category" name="categoryID">
                     <option value="">Select Category</option>
 
@@ -90,8 +83,6 @@ try {
 
             <div id="bd-description-div">
                 <label>Description:</label>
-
-                <!-- added name so PHP can receive the description -->
                 <textarea id="bd-description" name="description" rows="2" cols="60"></textarea>
             </div>
 
@@ -100,8 +91,6 @@ try {
 
                     <div class="pic-left">
                         <label>Upload photo:</label>
-
-                        <!-- changed name for photo upload -->
                         <input type="file" id="bd-photoFile" name="photoFile" accept="image/*">
                     </div>
 
@@ -118,8 +107,8 @@ try {
                     <div id="ingredients-list">
                         <!-- default ingredient inputs -->
                         <div class="ingredient-row">
-                            <input type="text" name="ingredient_name[]" placeholder="Ingredient name">
-                            <input type="text" name="ingredient_quantity[]" placeholder="Quantity">
+                            <input class="ing-name" type="text" name="ingredient_name[]" placeholder="Ingredient name">
+                            <input class="ing-qty" type="text" name="ingredient_quantity[]" placeholder="Quantity">
                         </div>
                     </div>
 
@@ -135,7 +124,7 @@ try {
                     <div id="steps-list">
                         <!-- default instruction input -->
                         <div class="step-row">
-                            <textarea name="steps[]" rows="2" cols="60" placeholder="Write the step here"></textarea>
+                            <textarea class="step-text" name="steps[]" rows="2" cols="60" placeholder="Write the step here"></textarea>
                         </div>
                     </div>
 
@@ -148,8 +137,6 @@ try {
                 <div id="bd-uploadVid-div">
                     <div class="vid-left">
                         <label>Upload video:</label>
-
-                        <!-- added name for video upload -->
                         <input type="file" id="bd-videoFile" name="videoFile" accept="video/*">
 
                         <label>Video URL:</label>
