@@ -70,7 +70,7 @@ try {
                 <input type="text" id="bd-name" name="name" placeholder="input recipe name">
 
                 <label>Category:</label>
-                <select id="bd-category" name="categoryID">
+                <select id="bd-category" name="categoryID" required>
                     <option value="">Select Category</option>
 
                     <?php foreach ($categories as $category): ?>
@@ -140,7 +140,7 @@ try {
                         <input type="file" id="bd-videoFile" name="videoFile" accept="video/*">
 
                         <label>Video URL:</label>
-                        <textarea id="bd-videoUrl" rows="2" cols="60" placeholder="https://..."></textarea>
+                        <textarea id="bd-videoUrl" name="videoUrl" rows="2" cols="60" placeholder="https://..."></textarea>
                     </div>
 
                     <div class="vid-right">

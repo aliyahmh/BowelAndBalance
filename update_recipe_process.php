@@ -21,9 +21,10 @@ $userID = $_SESSION['userID'];
 
 // get form data
 $recipeID = $_POST['recipeID'] ?? '';
-$name = $_POST['name'] ?? '';
+$name = trim($_POST['name'] ?? '');
 $categoryID = $_POST['categoryID'] ?? '';
-$description = $_POST['description'] ?? '';
+$description = trim($_POST['description'] ?? '');
+$videoUrl = trim($_POST['videoUrl'] ?? '');
 
 // get ingredients and instructions arrays
 $ingredientNames = $_POST['ingredient_name'] ?? [];
@@ -34,10 +35,18 @@ $steps = $_POST['steps'] ?? [];
 $oldPhotoFileName = $_POST['oldPhotoFileName'] ?? '';
 $oldVideoFilePath = $_POST['oldVideoFilePath'] ?? '';
 
-// check recipe ID
+// validate recipe ID
 if (empty($recipeID) || !is_numeric($recipeID)) {
     die("Invalid recipe ID.");
 }
+
+// validate category
+if ($categoryID === '' || !is_numeric($categoryID)) {
+    die("You must select a category.");
+}
+
+$recipeID = (int) $recipeID;
+$categoryID = (int) $categoryID;
 
 // keep old files by default
 $newPhotoFileName = $oldPhotoFileName;
@@ -60,7 +69,6 @@ try {
         $photoTargetPath = "uploads/images/" . $newPhotoFileName;
 
         if (move_uploaded_file($_FILES['photoFile']['tmp_name'], $photoTargetPath)) {
-            // this deletes old photo if a new photo is uploaded
             if (!empty($oldPhotoFileName)) {
                 $oldPhotoPath = "uploads/images/" . $oldPhotoFileName;
                 if (file_exists($oldPhotoPath)) {
@@ -70,23 +78,25 @@ try {
         }
     }
 
-    // this part handles new video upload
+    // this part handles new video file upload
     if (isset($_FILES['videoFile']) && $_FILES['videoFile']['error'] === 0) {
         $videoFileName = time() . "_" . basename($_FILES['videoFile']['name']);
         $newVideoFilePath = "uploads/videos/" . $videoFileName;
 
         if (move_uploaded_file($_FILES['videoFile']['tmp_name'], $newVideoFilePath)) {
-            // this deletes old video if a new video is uploaded
-            if (!empty($oldVideoFilePath) && file_exists($oldVideoFilePath)) {
+            if (!empty($oldVideoFilePath) && str_starts_with($oldVideoFilePath, 'uploads/videos/') && file_exists($oldVideoFilePath)) {
                 unlink($oldVideoFilePath);
             }
         }
     }
+    // if no new file but user entered a URL, save the URL
+    elseif ($videoUrl !== '') {
+        $newVideoFilePath = $videoUrl;
+    }
 
-    // start transaction
     $pdo->beginTransaction();
 
-    // this query updates recipe main information
+    // update recipe main information
     $sqlUpdateRecipe = "UPDATE recipe
                         SET categoryID = ?, name = ?, description = ?, photoFileName = ?, videoFilePath = ?
                         WHERE id = ? AND userID = ?";
@@ -101,12 +111,12 @@ try {
         $userID
     ]);
 
-    // this query deletes old ingredients
+    // delete old ingredients
     $sqlDeleteIngredients = "DELETE FROM ingredients WHERE recipeID = ?";
     $stmtDeleteIngredients = $pdo->prepare($sqlDeleteIngredients);
     $stmtDeleteIngredients->execute([$recipeID]);
 
-    // this query inserts updated ingredients
+    // insert updated ingredients
     $sqlInsertIngredient = "INSERT INTO ingredients (recipeID, ingredientName, ingredientQuantity)
                             VALUES (?, ?, ?)";
     $stmtInsertIngredient = $pdo->prepare($sqlInsertIngredient);
@@ -120,12 +130,12 @@ try {
         }
     }
 
-    // this query deletes old instructions
+    // delete old instructions
     $sqlDeleteInstructions = "DELETE FROM instructions WHERE recipeID = ?";
     $stmtDeleteInstructions = $pdo->prepare($sqlDeleteInstructions);
     $stmtDeleteInstructions->execute([$recipeID]);
 
-    // this query inserts updated instructions
+    // insert updated instructions
     $sqlInsertInstruction = "INSERT INTO instructions (recipeID, step, stepOrder)
                              VALUES (?, ?, ?)";
     $stmtInsertInstruction = $pdo->prepare($sqlInsertInstruction);
@@ -139,10 +149,8 @@ try {
         }
     }
 
-    // save all changes
     $pdo->commit();
 
-    // this page redirects to my recipes page
     header("Location: MyRecipe.php");
     exit;
 

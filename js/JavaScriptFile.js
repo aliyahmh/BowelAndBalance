@@ -184,6 +184,15 @@ if (page.includes("addnewrecipe")) {
         return;
       }
 
+const category = document.getElementById("bd-category");
+if (category.value === "") {
+  alert("You must select a category");
+  category.focus();
+  e.preventDefault();
+  return;
+}
+
+
       // 2) Description
       const desc = document.querySelector("#bd-description-div textarea");
       if (desc.value.trim() === "") {
@@ -192,6 +201,8 @@ if (page.includes("addnewrecipe")) {
         e.preventDefault();
         return;
       }
+
+      
 
       // 3) Photo (required)
       const photoInput = document.getElementById("bd-photoFile");
@@ -415,6 +426,16 @@ if (page.includes("editrecipe")) {
         e.preventDefault();
         return;
       }
+
+
+const category = document.getElementById("bd-category");
+if (category.value === "") {
+  alert("You must select a category");
+  category.focus();
+  e.preventDefault();
+  return;
+}
+
 
       const desc = document.querySelector("#bd-description-div textarea");
       if (desc.value.trim() === "") {

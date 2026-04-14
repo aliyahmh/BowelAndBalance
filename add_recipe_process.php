@@ -21,13 +21,21 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $userID = $_SESSION['userID'];
 
 // get form data
-$name = $_POST['name'] ?? '';
+$name = trim($_POST['name'] ?? '');
 $categoryID = $_POST['categoryID'] ?? '';
-$description = $_POST['description'] ?? '';
+$description = trim($_POST['description'] ?? '');
+$videoUrl = trim($_POST['videoUrl'] ?? '');
 
 $ingredientNames = $_POST['ingredient_name'] ?? [];
 $ingredientQuantities = $_POST['ingredient_quantity'] ?? [];
 $steps = $_POST['steps'] ?? [];
+
+// validate category
+if ($categoryID === '' || !is_numeric($categoryID)) {
+    die("You must select a category.");
+}
+
+$categoryID = (int) $categoryID;
 
 // file variables
 $photoFileName = null;
@@ -40,21 +48,16 @@ if (isset($_FILES['photoFile']) && $_FILES['photoFile']['error'] === 0) {
     move_uploaded_file($_FILES['photoFile']['tmp_name'], $target);
 }
 
-// HANDLE VIDEO UPLOAD
+// HANDLE VIDEO FILE UPLOAD
 if (isset($_FILES['videoFile']) && $_FILES['videoFile']['error'] === 0) {
     $videoName = time() . "_" . basename($_FILES['videoFile']['name']);
     $videoFilePath = "uploads/videos/" . $videoName;
     move_uploaded_file($_FILES['videoFile']['tmp_name'], $videoFilePath);
 }
-
-
-
-
-
-
-
-
-
+// IF NO FILE, SAVE VIDEO URL
+elseif ($videoUrl !== '') {
+    $videoFilePath = $videoUrl;
+}
 
 try {
     $pdo->beginTransaction();
