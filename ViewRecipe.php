@@ -1,34 +1,91 @@
 <?php
 session_start();
+require_once 'db_connect.php'; // This provides the $pdo connection
 
-// check if logged in
+// 1. Authentication Check
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
 
-      
+// 2. Validate Recipe ID from URL
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: MyRecipe.php");
+    exit();
+}
+
+$recipe_id = intval($_GET['id']);
+$user_id = $_SESSION['userID'];
+
+try {
+    // 3. Fetch Recipe, Creator, and Category details
+    // Table: recipe (id, userID, categoryID, name, description, photoFileName, videoFilePath)
+    // Table: user (id, firstName, lastName, photoFileName)
+    $query = "SELECT r.*, u.firstName, u.lastName, u.photoFileName AS userPhoto, c.categoryName,
+              (SELECT COUNT(*) FROM likes WHERE recipeID = r.id) AS likes_count
+              FROM recipe r
+              JOIN user u ON r.userID = u.id
+              JOIN recipecategory c ON r.categoryID = c.id
+              WHERE r.id = ?";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$recipe_id]);
+    $recipe = $stmt->fetch();
+
+    if (!$recipe) {
+        header("Location: MyRecipe.php");
+        exit();
+    }
+
+    // 4. Fetch Ingredients
+    // Table: ingredients (id, recipeID, ingredientName, ingredientQuantity)
+    $ing_stmt = $pdo->prepare("SELECT ingredientName, ingredientQuantity FROM ingredients WHERE recipeID = ? ORDER BY id");
+    $ing_stmt->execute([$recipe_id]);
+    $ingredients = $ing_stmt->fetchAll();
+
+    // 5. Fetch Instructions
+    // Table: instructions (id, recipeID, step, stepOrder)
+    $inst_stmt = $pdo->prepare("SELECT step FROM instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
+    $inst_stmt->execute([$recipe_id]);
+    $instructions = $inst_stmt->fetchAll();
+
+    // 6. Fetch Comments
+    // Table: comment (id, recipeID, userID, comment, date)
+    $comm_stmt = $pdo->prepare("SELECT c.comment, c.date, u.firstName, u.lastName 
+                                FROM comment c 
+                                JOIN user u ON c.userID = u.id 
+                                WHERE c.recipeID = ? 
+                                ORDER BY c.date DESC");
+    $comm_stmt->execute([$recipe_id]);
+    $comments = $comm_stmt->fetchAll();
+
+    // 7. Check if logged-in user liked or favorited
+    $like_stmt = $pdo->prepare("SELECT 1 FROM likes WHERE userID = ? AND recipeID = ?");
+    $like_stmt->execute([$user_id, $recipe_id]);
+    $user_liked = $like_stmt->fetch() !== false;
+
+    $fav_stmt = $pdo->prepare("SELECT 1 FROM favourites WHERE userID = ? AND recipeID = ?");
+    $fav_stmt->execute([$user_id, $recipe_id]);
+    $user_favorited = $fav_stmt->fetch() !== false;
+
+} catch (PDOException $e) {
+    die("Database error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Bowl & Balance</title>
+    <title>Bowl & Balance - <?php echo htmlspecialchars($recipe['name']); ?></title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         @import url(MergedStyle.css);
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
     </style>
 </head>
 
-<body id ="bg">
-    <!-- Header -->
+<body id="bg">
     <header class="page-header">
         <div class="header-content">
             <div class="header-logo">
@@ -46,121 +103,107 @@ if (!isset($_SESSION['userID'])) {
         </div>
     </header>
 
-
-
-
     <main>
-
         <div id="Sheet">
             <div class="container">
-
                 <div class="flexRow">
-                    <h1 class="rname">Poke Bowl Recipe</h1>
-
-                    <img id=bowlImg src="IMAGES/Copy of Bowl & Balance.png" alt="Poke Bowl">
+                    <h1 class="rname"><?php echo htmlspecialchars($recipe['name']); ?></h1>
+                    <?php 
+                        $recipe_img = !empty($recipe['photoFileName']) ? "IMAGES/".$recipe['photoFileName'] : "IMAGES/default-recipe.png";
+                    ?>
+                    <img id="bowlImg" src="<?php echo $recipe_img; ?>" alt="<?php echo htmlspecialchars($recipe['name']); ?>">
                 </div>
 
-
-
                 <div class="flexRow">
-                    <h2><img class="j-makerImg" src="IMAGES/Sara.jpg" alt=""> By Joud BinFaris</h2>
+                    <?php 
+                        $creator_img = !empty($recipe['userPhoto']) ? "IMAGES/".$recipe['userPhoto'] : "IMAGES/profile.png";
+                    ?>
+                    <h2><img class="j-makerImg" src="<?php echo $creator_img; ?>" alt="Creator"> 
+                        By <?php echo htmlspecialchars($recipe['firstName'] . ' ' . $recipe['lastName']); ?>
+                    </h2>
 
-                    <button id="like">Like</button> <button id="fav">Favorite</button> <button
-                        id="report">Report</button>
+                    <div class="interaction-buttons">
+                        <button id="like"><?php echo $user_liked ? '❤️ Liked' : '🤍 Like'; ?> (<?php echo $recipe['likes_count']; ?>)</button> 
+                        <button id="fav"><?php echo $user_favorited ? '⭐ Favorited' : '☆ Favorite'; ?></button> 
+                        <button id="report">🚩 Report</button>
+                    </div>
                 </div>
 
+                <p class="rcategory"><?php echo htmlspecialchars($recipe['categoryName']); ?></p>
 
-                <p class="rcategory">Lunch</p>
-
-                <p class="rdescription">This easy Poke Bowl Recipe is packed
-                    with sushi-grade ahi tuna seasoned with
-                    soy, honey, and plenty of sesame. It's
-                    served with sticky white rice and tons of
-                    veggies. </p>
+                <p class="rdescription"><?php echo htmlspecialchars($recipe['description']); ?></p>
+                
                 <h2 class="j-sectionHeader">Ingredients:</h2>
                 <ul class="j-sectionText" id="indent">
-                    <li>1 lb sushi-grade ahi tuna</li>
-                    <li>2 tbsp soy sauce</li>
-                    <li>1 tbsp sesame oil</li>
-                    <li>1 tbsp rice vinegar</li>
-                    <li>1 tsp honey</li>
-                    <li>4 cups cooked white rice</li>
-                    <li>1 cup diced cucumber</li>
-                    <li>1/2 cup shelled edamame</li>
-                    <li>1 tbsp black sesame seeds</li>
-                    <li>2 large avocados, peeled and sliced</li>
-
+                    <?php foreach ($ingredients as $ing): ?>
+                        <li>
+                            <strong><?php echo htmlspecialchars($ing['ingredientQuantity']); ?></strong> 
+                            <?php echo htmlspecialchars($ing['ingredientName']); ?>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
+
                 <h2 class="j-sectionHeader">Instructions:</h2>
                 <ol class="j-sectionText" id="indent2">
-                    <li>Use a sharp knife to cut tuna into a dice. Add tuna, soy sauce, sesame oil,
-                        rice vinegar, and honey to a medium bowl. Toss to combine. Let the tuna sit
-                        while you prepare the rest of the ingredients.</li>
-                    <li>Add mayo and sriracha to a bowl. Stir to combine.
-                        Season with salt and pepper. Soon into a ziplock bag.
-                        Cut the tip off.</li>
-                    <li>Divide cooked rice between four bowls. Spoon tuna on one part of the rice.
-                        Surround with a pile of the cucumber, edamae, and carrot. Spread half of an
-                        avocado on top of the bowl. Drizzle the spicy mayo over the bowl. Sprinle with
-                        green onon and sesame seeds.</li>
-
+                    <?php foreach ($instructions as $inst): ?>
+                        <li><?php echo htmlspecialchars($inst['step']); ?></li>
+                    <?php endforeach; ?>
                 </ol>
+
                 <h2 class="j-sectionHeader">Video:</h2>
-                <p class="j-sectionText">No Video Provided.</p>
+                <?php if (!empty($recipe['videoFilePath'])): ?>
+                    <p class="j-sectionText">
+                        <a href="<?php echo htmlspecialchars($recipe['videoFilePath']); ?>" target="_blank" style="color: #d35400; font-weight: bold;">
+                            ▶ Watch Recipe Tutorial
+                        </a>
+                    </p>
+                <?php else: ?>
+                    <p class="j-sectionText">No Video Provided.</p>
+                <?php endif; ?>
+
                 <h2 class="j-sectionHeader">Comments:</h2>
-                <form id="j-form">
+                <form id="j-form" action="add_comment_process.php" method="POST">
+                    <input type="hidden" name="recipeID" value="<?php echo $recipe_id; ?>">
                     <input type="text" name="comment" placeholder="Add a comment.." size="60" id="comment" required>
                     <input type="submit" value="Post" id="post">
                 </form>
+
                 <div id="comments">
-                    <div class="flexRow"  ><img class="profile" src="IMAGES/profile.png" alt="">
-                        <p class="j-sectionText">User234452: so yummy.</p><span class=date>7-1-2026</span>
-                    </div>
-                    <div class="flexRow"  ><img class="profile" src="IMAGES/profile.png" alt="">
-                        <p class="j-sectionText">User912736: 10/10.</p><span class=date>24-12-2025</span>
-                    </div>
-                    <div class="flexRow"  ><img  class="profile" src="IMAGES/profile.png" alt="">
-                        <p class="j-sectionText">User492038: I used salmon instead. recommended.</p><span class=date>10-11-2025</span>
-                    </div>
-
-
-
+                    <?php if (empty($comments)): ?>
+                        <p class="j-sectionText" style="padding: 10px; color: #777;">Be the first to comment!</p>
+                    <?php else: ?>
+                        <?php foreach ($comments as $comm): ?>
+                            <div class="flexRow" style="margin-bottom: 15px; align-items: flex-start;">
+                                <img class="profile" src="IMAGES/profile.png" alt="User">
+                                <div style="margin-left: 10px;">
+                                    <p class="j-sectionText">
+                                        <strong><?php echo htmlspecialchars($comm['firstName']); ?>:</strong> 
+                                        <?php echo htmlspecialchars($comm['comment']); ?>
+                                    </p>
+                                    <span class="date" style="font-size: 0.8em; color: #888;">
+                                        <?php echo date('d-m-Y', strtotime($comm['date'])); ?>
+                                    </span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
-
             </div>
-
-
-
-
-
         </div>
     </main>
 
-   <!-- Footer -->
-   <footer class="page-footer">
-    <div class="footer-container">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="mailto:contact@bowlandbalance.com" class="footer-link">
-                    <span class="footer-icon">📧</span>
-                    contact@bowlandbalance.com
-                </a>
-                <a href="tel:+966501234567" class="footer-link">
-                    <span class="footer-icon">📞</span>
-                    +966 50 123 4567
-                </a>
-                <a href="https://x.com/bowlandbalance" target="_blank" class="footer-link">
-                    <span class="footer-icon">𝕏</span>
-                    @bowlandbalance
-                </a>
-            </div>
-            <div class="footer-copyright">
-                <p>&copy; 2026 Bowl & Balance. All rights reserved.</p>
+    <footer class="page-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="mailto:contact@bowlandbalance.com" class="footer-link">📧 contact@bowlandbalance.com</a>
+                    <a href="tel:+966501234567" class="footer-link">📞 +966 50 123 4567</a>
+                </div>
+                <div class="footer-copyright">
+                    <p>&copy; 2026 Bowl & Balance. All rights reserved.</p>
+                </div>
             </div>
         </div>
-    </div>
-</footer>
-
+    </footer>
 </body>
-
 </html>
