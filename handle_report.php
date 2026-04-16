@@ -21,26 +21,26 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
 
     if ($action === 'block') {
         try {
-            // 1. Identify the user who created the reported recipe
+            // Identify the user who created the reported recipe
             $stmt = $pdo->prepare("SELECT userID FROM recipe WHERE id = ?");
             $stmt->execute([$recipeID]);
             $user = $stmt->fetch();
             $targetUID = $user['userID'];
 
-            // 2. Fetch user details using your specific column names
+            // Fetch user details 
             $stmt = $pdo->prepare("SELECT firstName, lastName, emailAddress FROM user WHERE id = ?");
             $stmt->execute([$targetUID]);
             $uDetails = $stmt->fetch();
 
             $pdo->beginTransaction();
 
-            // 3. Delete associated data
+            // Delete associated data
             $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
             
-            // 4. Delete all recipes belonging to this user 
+            // Delete all recipes belonging to this user 
             $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
 
-            // 5. INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
+            // INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
             $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
             $stmt->execute([
                 $uDetails['firstName'], 
