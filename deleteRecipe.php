@@ -47,7 +47,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             // 4. Requirement: Delete recipe photo and video from the system
             // Note: Your slides mention storing file locations on the filesystem [cite: 1294, 1299]
             if (!empty($recipe['photoFileName'])) {
-                $photoPath = "IMAGES/" . $recipe['photoFileName'];
+                $photoPath = "uploads/images/" . $recipe['photoFileName'];
                 if (file_exists($photoPath)) {
                     unlink($photoPath); // Deletes the physical image file
                 }
@@ -55,7 +55,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
             // If videoFilePath is a local path and not a YouTube link
             if (!empty($recipe['videoFilePath']) && !str_contains($recipe['videoFilePath'], 'youtube.com')) {
-                if (file_exists($recipe['videoFilePath'])) {
+                 $videoPath = "uploads/images/" . $recipe['videoFileName'];
+                if (file_exists($recipe[$videoPath])) {
                     unlink($recipe['videoFilePath']); // Deletes the physical video file
                 }
             }

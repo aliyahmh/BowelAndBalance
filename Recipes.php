@@ -191,7 +191,7 @@ $recipes = $stmt->fetchAll();
 
                                 <!-- Image from IMAGES folder using photoFileName -->
                                 <img class="ar-pic"
-                                     src="IMAGES/<?php echo $recipe['photoFileName']; ?>"
+                                     src="uploads/images/<?php echo $recipe['photoFileName']; ?>"
                                      alt="<?php echo $recipe['name']; ?>">
                             </div>
 
@@ -200,7 +200,7 @@ $recipes = $stmt->fetchAll();
                             <div class="ar-pop">
                                 <div class="ar-popIn">
                                     <img class="ar-popPic"
-                                         src="IMAGES/<?php echo $recipe['photoFileName']; ?>"
+                                         src="uploads/images/<?php echo $recipe['photoFileName']; ?>"
                                          alt="">
 
                                     <p class="ar-line">

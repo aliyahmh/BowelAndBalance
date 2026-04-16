@@ -110,7 +110,7 @@ try {
                 <div class="container">
                     <div class="flexRow">
                         <h1 class="rname"><?php echo $recipe['name']; ?></h1>
-                        <img id="bowlImg" src="IMAGES/<?php echo $recipe['photoFileName']; ?>" alt="Recipe Image">
+                        <img id="bowlImg" src="uploads/images/<?php echo $recipe['photoFileName']; ?>" alt="Recipe Image">
                     </div>
 
                     <div class="flexRow">

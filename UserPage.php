@@ -100,7 +100,7 @@ try {
             <h2 class="section-title">Profile Information</h2>
             <div class="profile-grid">
                 <!-- Profile Picture -->
-                <img src="IMAGES/<?php echo htmlspecialchars($user['photoFileName']); ?>" alt="profile picture" class="profile-photo">
+                <img src="uploads/images/<?php echo htmlspecialchars($user['photoFileName']); ?>" alt="profile picture" class="profile-photo">
 
                 <!-- Profile Details -->
                 <div class="profile-details">
