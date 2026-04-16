@@ -37,7 +37,7 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
             // 3. Delete associated data
             $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
             
-            // 4. Delete all recipes belonging to this user [Requirement 11c]
+            // 4. Delete all recipes belonging to this user 
             $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
 
             // 5. INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
@@ -58,7 +58,7 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
         }
     }
 
-    // 7. Delete the report and return to dashboard [Requirement 11c]
+    // 7. Delete the report and return to dashboard 
     $pdo->prepare("DELETE FROM report WHERE id = ?")->execute([$reportID]);
     header("Location: AdminPage.php");
     exit();

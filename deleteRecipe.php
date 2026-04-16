@@ -44,12 +44,12 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             // Commit database changes
             $pdo->commit();
 
-            // 4. Requirement: Delete recipe photo and video from the system
-            // Note: Your slides mention storing file locations on the filesystem [cite: 1294, 1299]
+            // Requirement: Delete recipe photo and video from the system
+            // Note: Your slides mention storing file locations on the filesystem 
             if (!empty($recipe['photoFileName'])) {
                 $photoPath = "uploads/images/" . $recipe['photoFileName'];
                 if (file_exists($photoPath)) {
-                    unlink($photoPath); // Deletes the physical image file
+                    unlink($photoPath); 
                 }
             }
 

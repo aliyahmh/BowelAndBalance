@@ -169,7 +169,7 @@ try {
                                     </div>
                                 </td>
                                 <td>
-                                    <img src="IMAGES/<?php echo htmlspecialchars($fav['photoFileName']); ?>" alt="<?php echo htmlspecialchars($fav['name']); ?>" class="recipe-photo">
+                                    <img src="uploads/images/<?php echo htmlspecialchars($fav['photoFileName']); ?>" alt="<?php echo htmlspecialchars($fav['name']); ?>" class="recipe-photo">
                                 </td>
                                 <td>
                                     <a href="remove_favorite.php?id=<?php echo $fav['id']; ?>" 

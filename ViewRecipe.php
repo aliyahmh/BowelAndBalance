@@ -8,11 +8,7 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if regular user 
-if ($_SESSION['userType'] !== 'user') {
-    header("Location: index.php?error=unauthorized");
-    exit;
-}
+
 
 //Check recipe ID from query string 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
