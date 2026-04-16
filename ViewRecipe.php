@@ -12,9 +12,9 @@ $user_id = $_SESSION['userID']; // Accessing session data
 
 try {
     // Check if current viewer is Admin 
-    $u_stmt = $pdo->prepare("SELECT userType FROM user WHERE id = ?");
-    $u_stmt->execute([$user_id]);
-    $current_user = $u_stmt->fetch();
+    $userTypeQuery = $pdo->prepare("SELECT userType FROM user WHERE id = ?");
+    $userTypeQuery->execute([$user_id]);
+    $current_user = $userTypeQuery->fetch();
     $is_admin = ($current_user['userType'] === 'admin');
 
     //Retrieve recipe and creator information using JOIN 
@@ -24,9 +24,9 @@ try {
               JOIN user u ON r.userID = u.id
               JOIN recipecategory c ON r.categoryID = c.id
               WHERE r.id = ?";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$recipe_id]);
-    $recipe = $stmt->fetch();
+    $recipeStatement = $pdo->prepare($query);
+    $recipeStatement->execute([$recipe_id]);
+    $recipe = $recipeStatement->fetch();
 
     if (!$recipe) {
         header("Location: MyRecipe.php");
@@ -103,22 +103,22 @@ try {
                     <div class="flexRow">
                         <h2>By <?php echo $recipe['firstName'] . ' ' . $recipe['lastName']; ?></h2>
 
-<?php if ($show_buttons): ?>
+                        <?php if ($show_buttons): ?>
                             <div class="interaction-buttons">
                                 <button id="fav" onclick="location.href = 'add_favourite.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_favourited) echo 'disabled'; ?>>
-    <?php echo $has_favourited ? '⭐ Favourited' : '☆ Favourite'; ?>
+                                    <?php echo $has_favourited ? '⭐ Favourited' : '☆ Favourite'; ?>
                                 </button>
 
                                 <button id="like" onclick="location.href = 'add_like.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_liked) echo 'disabled'; ?>>
-    <?php echo $has_liked ? '❤️ Liked' : '🤍 Like'; ?> (<?php echo $likes_count; ?>)
+                                    <?php echo $has_liked ? '❤️ Liked' : '🤍 Like'; ?> (<?php echo $likes_count; ?>)
                                 </button>
 
                                 <button id="report" onclick="if (confirm('Report this recipe?'))
-                                        location.href = 'add_report.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_reported) echo 'disabled'; ?>>
-                                    <?php echo $has_reported ? '🚩 Already Reported' : '🚩 Report'; ?>
+                                                location.href = 'add_report.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_reported) echo 'disabled'; ?>>
+                                            <?php echo $has_reported ? '🚩 Already Reported' : '🚩 Report'; ?>
                                 </button>
                             </div>
-<?php endif; ?>
+                        <?php endif; ?>
                     </div>
 
                     <p class="rcategory"><?php echo $recipe['categoryName']; ?></p>
@@ -126,13 +126,13 @@ try {
 
                     <h2 class="j-sectionHeader">Ingredients:</h2>
                     <ul class="j-sectionText" id="indent">
-<?php
+                        <?php
 // Fetch and loop through ingredients 
-$ing_stmt = $pdo->prepare("SELECT ingredientName, ingredientQuantity FROM ingredients WHERE recipeID = ?");
-$ing_stmt->execute([$recipe_id]);
-while ($ing = $ing_stmt->fetch()):
-    ?>
-                            <li><?php echo $ing['ingredientQuantity'] . " " . $ing['ingredientName']; ?></li>
+                        $ingredientsQuery = $pdo->prepare("SELECT ingredientName, ingredientQuantity FROM ingredients WHERE recipeID = ?");
+                        $ingredientsQuery->execute([$recipe_id]);
+                        while ($ingredient = $ingredientsQuery->fetch()):
+                            ?>
+                            <li><?php echo $ingredient['ingredientQuantity'] . " " . $ingredient['ingredientName']; ?></li>
                         <?php endwhile; ?>
                     </ul>
 
@@ -140,33 +140,33 @@ while ($ing = $ing_stmt->fetch()):
                     <ol class="j-sectionText" id="indent2">
                         <?php
                         // Fetch and loop through instructions 
-                        $inst_stmt = $pdo->prepare("SELECT step FROM instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
-                        $inst_stmt->execute([$recipe_id]);
-                        while ($inst = $inst_stmt->fetch()):
+                        $instructionsQuery = $pdo->prepare("SELECT step FROM instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
+                        $instructionsQuery->execute([$recipe_id]);
+                        while ($instruction = $instructionsQuery->fetch()):
                             ?>
-                            <li><?php echo $inst['step']; ?></li>
+                            <li><?php echo $instruction['step']; ?></li>
                         <?php endwhile; ?>
                     </ol>
 
-                   <h2 class="j-sectionHeader">Comments:</h2>
-                <form id="j-form" action="add_comment_process.php" method="POST">
-                    <input type="hidden" name="recipeID" value="<?php echo $recipe_id; ?>">
-                    <input type="text" name="comment" placeholder="Add a comment.." size="60" id="comment" required>
-                    <input type="submit" value="Post" id="post">
-                </form>
+                    <h2 class="j-sectionHeader">Comments:</h2>
+                    <form id="j-form" action="add_comment_process.php" method="POST">
+                        <input type="hidden" name="recipeID" value="<?php echo $recipe_id; ?>">
+                        <input type="text" name="comment" placeholder="Add a comment.." size="60" id="comment" required>
+                        <input type="submit" value="Post" id="post">
+                    </form>
 
                     <div id="comments">
                         <?php
                         // Fetch and display comments 
-                        $comm_stmt = $pdo->prepare("SELECT c.comment, c.date, u.firstName FROM comment c JOIN user u ON c.userID = u.id WHERE c.recipeID = ? ORDER BY c.date DESC");
-                        $comm_stmt->execute([$recipe_id]);
-                        while ($comm = $comm_stmt->fetch()):
+                        $commentsQuery = $pdo->prepare("SELECT c.comment, c.date, u.firstName FROM comment c JOIN user u ON c.userID = u.id WHERE c.recipeID = ? ORDER BY c.date DESC");
+                        $commentsQuery->execute([$recipe_id]);
+                        while ($comment = $commentsQuery->fetch()):
                             ?>
                             <div class="flexRow comment-box">
-                                <p class="j-sectionText"><strong><?php echo $comm['firstName']; ?>:</strong> <?php echo $comm['comment']; ?></p>
-                                <span class="date"><?php echo date('d-m-Y', strtotime($comm['date'])); ?></span>
+                                <p class="j-sectionText"><strong><?php echo $comment['firstName']; ?>:</strong> <?php echo $comment['comment']; ?></p>
+                                <span class="date"><?php echo date('d-m-Y', strtotime($comment['date'])); ?></span>
                             </div>
-<?php endwhile; ?>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
