@@ -118,11 +118,6 @@ try {
                         <div class="detail-value"><?php echo htmlspecialchars($user['emailAddress']); ?></div>
                     </div>
 
-                    <!-- 3. Member Since -->
-                    <div class="detail-item">
-                        <div class="detail-label">Member Since</div>
-                        <div class="detail-value">March 15, 2023</div>
-                    </div>
                 </div>
             </div>
         </section>
