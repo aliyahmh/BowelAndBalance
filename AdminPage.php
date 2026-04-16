@@ -12,7 +12,7 @@ if (!isset($_SESSION['userID'])) {
 
 // check if regular admin (not user)
 if ($_SESSION['userType'] !== 'admin') {
-    header("Location: login.php?error=unauthorized");
+    header("Location: index.php?error=unauthorized");
     exit;
 }
 // Retrive Admin info

@@ -5,14 +5,6 @@ require 'db_connect.php';
 $email    = $_POST['email'];
 $password = $_POST['password'];
 
-
-
-session_start();
-require 'db_connect.php';
-
-$email    = $_POST['email'];
-$password = $_POST['password'];
-
 // checking if email belongs to a blocked user
 $stmt = $pdo->prepare("SELECT id FROM BlockedUser WHERE emailAddress = ?");
 $stmt->execute([$email]);

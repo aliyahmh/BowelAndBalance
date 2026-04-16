@@ -2,10 +2,17 @@
 session_start();
 require_once 'db_connect.php'; // This provides the $pdo connection
 
-// 1. Check if the user is logged in
+
+// check if logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
-    exit();
+    exit;
+}
+
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
+    exit;
 }
 
 // 2. Check if the form was actually submitted

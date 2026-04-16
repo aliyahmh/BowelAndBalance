@@ -1,6 +1,19 @@
 <?php
 require_once 'db_connect.php'; 
 
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
+    exit;
+}
+
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
     $recipeID = $_POST['recipeID'];
     $reportID = $_POST['reportID'];

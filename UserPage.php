@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 session_start();
 
 require_once 'db_connect.php'; 
@@ -11,9 +9,9 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if regular user (not admin)
+// check if regular user 
 if ($_SESSION['userType'] !== 'user') {
-    header("Location: login.php?error=unauthorized");
+    header("Location: index.php?error=unauthorized");
     exit;
 }
 

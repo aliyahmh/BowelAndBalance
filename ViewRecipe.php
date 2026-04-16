@@ -1,6 +1,19 @@
 <?php
 session_start();
 require_once 'db_connect.php'; // Includes the $pdo connection
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
+    exit;
+}
+
 //Check recipe ID from query string 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: MyRecipe.php"); // Redirecting if ID is invalid

@@ -2,6 +2,19 @@
 session_start();
 require_once 'db_connect.php';
 
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
+    exit;
+}
+
 // 1. Requirement: Check recipe's id that is sent in the query string
 if (isset($_GET['id']) && is_numeric($_GET['id'])) { 
     $recipeID = $_GET['id'];
