@@ -11,7 +11,7 @@ echo "<br>";
 echo password_hash("Aroub!", PASSWORD_DEFAULT); // displays hashed Aroub password
 echo "<br>";
 
-echo password_hash("Joud!", PASSWORD_DEFAULT); // displays hashed Joud password
+echo password_hash("Joud!!", PASSWORD_DEFAULT); // displays hashed Joud password
 echo "<br>";
 
 echo password_hash("baduser!", PASSWORD_DEFAULT); // displays hashed bad user password
