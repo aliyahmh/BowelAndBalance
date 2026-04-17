@@ -1,4 +1,7 @@
 <?php
+
+session_start();
+
 require_once 'db_connect.php'; 
 
 
@@ -8,8 +11,8 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if regular user 
-if ($_SESSION['userType'] !== 'user') {
+// check if  admin (not user)
+if ($_SESSION['userType'] !== 'admin') {
     header("Location: index.php?error=unauthorized");
     exit;
 }

@@ -85,7 +85,7 @@ try {
                     <h2 class="section-title">Profile Information</h2>
                     <div class="profile-grid">
                         <!-- Profile Picture -->
-                        <img src="IMAGES/<?php echo $admin['photoFileName']; ?>" alt="profile picture" class="profile-photo">
+                        <img src="uploads/images/<?php echo $admin['photoFileName']; ?>" alt="profile picture" class="profile-photo">
 
                         <!-- Profile Details -->
                         <div class="profile-details">
@@ -125,7 +125,7 @@ try {
                         </div>
 
                         <div class="creator-info">
-                            <img src="IMAGES/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
+                            <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
                             <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
                         </div>
 
