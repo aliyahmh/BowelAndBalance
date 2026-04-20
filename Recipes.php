@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $selectedCat = $_POST['categoryID'];
 
-    // If "View All" is selected, categoryID will be empty
-    // In that case, skip the WHERE filter and fetch all recipes instead
+    //  "View All" 
+    //  skip the WHERE filter and fetch all recipes instead
     if ($selectedCat === '') {
 
         $stmt = $pdo->query("
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
     } else {
 
-        // Prepared statement to filter recipes by category
+        //  filter recipes by category
         $stmt = $pdo->prepare("
             SELECT r.id, r.name, r.photoFileName,
        rc.categoryName,
@@ -62,7 +62,7 @@ GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName
     }
 } else {
 
-    // GET request — retrieve ALL recipes from the database
+    // GET request 
     $stmt = $pdo->query("
        SELECT r.id, r.name, r.photoFileName,
        rc.categoryName,
