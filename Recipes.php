@@ -221,7 +221,7 @@ $recipes = $stmt->fetchAll();
 
                                               <div class="ar-makerContent">
                                                   <img class="ar-makerImg"
-                                                       src="IMAGES/<?php echo $recipe['creatorPhoto']; ?>">
+                                                       src="uploads/images/<?php echo $recipe['creatorPhoto']; ?>">
 
                                                   <span><?php echo $recipe['creatorName']; ?></span>
                                               </div>
