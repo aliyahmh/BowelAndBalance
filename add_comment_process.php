@@ -15,7 +15,7 @@ if ($_SESSION['userType'] !== 'user') {
     exit;
 }
 
-// 2. Check if the form was actually submitted
+//Check if the form was actually submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $recipe_id = intval($_POST['recipeID']);
     $user_id = $_SESSION['userID'];
@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     // Only proceed if the comment isn't empty
     if (!empty($comment_text)) {
         try {
-            // 3. Insert into the 'comment' table
-            // Table columns: recipeID, userID, comment, date
+            //  Insert into the comment table
+            //  columns: recipeID, userID, comment, date
             $sql = "INSERT INTO comment (recipeID, userID, comment, date) VALUES (?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$recipe_id, $user_id, $comment_text, $current_date]);
