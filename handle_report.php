@@ -1,7 +1,21 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+
+session_start();
+
 require_once 'db_connect.php'; 
+
+
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if  admin (not user)
+if ($_SESSION['userType'] !== 'admin') {
+    header("Location: index.php?error=unauthorized");
+    exit;
+}
 
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
     $recipeID = $_POST['recipeID'];
@@ -10,26 +24,26 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
 
     if ($action === 'block') {
         try {
-            // 1. Identify the user who created the reported recipe
+            // Identify the user who created the reported recipe
             $stmt = $pdo->prepare("SELECT userID FROM recipe WHERE id = ?");
             $stmt->execute([$recipeID]);
             $user = $stmt->fetch();
             $targetUID = $user['userID'];
 
-            // 2. Fetch user details using your specific column names
+            // Fetch user details 
             $stmt = $pdo->prepare("SELECT firstName, lastName, emailAddress FROM user WHERE id = ?");
             $stmt->execute([$targetUID]);
             $uDetails = $stmt->fetch();
 
             $pdo->beginTransaction();
 
-            // 3. Delete associated data
+            // Delete associated data
             $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
             
-            // 4. Delete all recipes belonging to this user [Requirement 11c]
+            // Delete all recipes belonging to this user 
             $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
 
-            // 5. INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
+            // INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
             $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
             $stmt->execute([
                 $uDetails['firstName'], 
@@ -47,7 +61,7 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
         }
     }
 
-    // 7. Delete the report and return to dashboard [Requirement 11c]
+    // 7. Delete the report and return to dashboard 
     $pdo->prepare("DELETE FROM report WHERE id = ?")->execute([$reportID]);
     header("Location: AdminPage.php");
     exit();

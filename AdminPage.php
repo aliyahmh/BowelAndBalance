@@ -1,6 +1,5 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+
 session_start();
 
 require_once 'db_connect.php';
@@ -11,9 +10,9 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if regular admin (not user)
+// check if  admin (not user)
 if ($_SESSION['userType'] !== 'admin') {
-    header("Location: login.php?error=unauthorized");
+    header("Location: index.php?error=unauthorized");
     exit;
 }
 // Retrive Admin info
@@ -86,7 +85,7 @@ try {
                     <h2 class="section-title">Profile Information</h2>
                     <div class="profile-grid">
                         <!-- Profile Picture -->
-                        <img src="IMAGES/<?php echo $admin['photoFileName']; ?>" alt="profile picture" class="profile-photo">
+                        <img src="uploads/images/<?php echo $admin['photoFileName']; ?>" alt="profile picture" class="profile-photo">
 
                         <!-- Profile Details -->
                         <div class="profile-details">
@@ -126,7 +125,7 @@ try {
                         </div>
 
                         <div class="creator-info">
-                            <img src="IMAGES/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
+                            <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
                             <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
                         </div>
 

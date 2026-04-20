@@ -5,9 +5,15 @@ session_start();
 // include database connection
 require 'db_connect.php';
 
-// check login
+// check if logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
+    exit;
+}
+
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
     exit;
 }
 

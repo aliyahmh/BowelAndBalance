@@ -10,6 +10,12 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
+// check if regular user 
+if ($_SESSION['userType'] !== 'user') {
+    header("Location: index.php?error=unauthorized");
+    exit;
+}
+
 // this page only accepts POST request
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: MyRecipe.php");

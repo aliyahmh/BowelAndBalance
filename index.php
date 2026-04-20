@@ -1,20 +1,5 @@
 <?php
-session_start();
 
-// checking if user is logged in at all
-if (!isset($_SESSION['userID'])) {
-    header("Location: login.php");
-    exit;
-}
-
-// checking if they're the right type
-if ($_SESSION['userType'] !== 'user') {
-    header("Location: login.php?error=unauthorized");
-    exit;
-}
-
-// fetching their data
-$userID = $_SESSION['userID'];
         
 ?>
 

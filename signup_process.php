@@ -49,7 +49,7 @@ $userID = $pdo->lastInsertId();
 if (!empty($_FILES['photo']['name'])) {
     $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
     $photoFileName = "user_{$userID}." . $ext;
-    move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/users/" . $photoFileName);
+    move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/images/" . $photoFileName);
     
     // updating the user record with the real photo name
     $stmt = $pdo->prepare("UPDATE User SET photoFileName = ? WHERE id = ?");

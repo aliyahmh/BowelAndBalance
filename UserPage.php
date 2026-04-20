@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 session_start();
 
 require_once 'db_connect.php'; 
@@ -11,9 +9,9 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if regular user (not admin)
+// check if regular user 
 if ($_SESSION['userType'] !== 'user') {
-    header("Location: login.php?error=unauthorized");
+    header("Location: index.php?error=unauthorized");
     exit;
 }
 
@@ -102,7 +100,7 @@ try {
             <h2 class="section-title">Profile Information</h2>
             <div class="profile-grid">
                 <!-- Profile Picture -->
-                <img src="IMAGES/<?php echo htmlspecialchars($user['photoFileName']); ?>" alt="profile picture" class="profile-photo">
+                <img src="uploads/images/<?php echo htmlspecialchars($user['photoFileName']); ?>" alt="profile picture" class="profile-photo">
 
                 <!-- Profile Details -->
                 <div class="profile-details">
@@ -118,11 +116,6 @@ try {
                         <div class="detail-value"><?php echo htmlspecialchars($user['emailAddress']); ?></div>
                     </div>
 
-                    <!-- 3. Member Since -->
-                    <div class="detail-item">
-                        <div class="detail-label">Member Since</div>
-                        <div class="detail-value">March 15, 2023</div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -176,7 +169,7 @@ try {
                                     </div>
                                 </td>
                                 <td>
-                                    <img src="IMAGES/<?php echo htmlspecialchars($fav['photoFileName']); ?>" alt="<?php echo htmlspecialchars($fav['name']); ?>" class="recipe-photo">
+                                    <img src="uploads/images/<?php echo htmlspecialchars($fav['photoFileName']); ?>" alt="<?php echo htmlspecialchars($fav['name']); ?>" class="recipe-photo">
                                 </td>
                                 <td>
                                     <a href="remove_favorite.php?id=<?php echo $fav['id']; ?>" 
