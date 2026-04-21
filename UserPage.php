@@ -23,7 +23,6 @@ try {
     $stmt->execute([$userID]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Retrieve totals (Number of recipes and total likes)
 // Total recipes
     $recipeCountStmt = $pdo->prepare("SELECT COUNT(*) FROM recipe WHERE userID = ?");
     $recipeCountStmt->execute([$userID]);
