@@ -37,4 +37,3 @@ if ($user['userType'] === 'admin') {
     header("Location: UserPage.php");
 }
 exit;
-?>

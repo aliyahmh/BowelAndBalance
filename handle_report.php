@@ -66,4 +66,3 @@ if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
     header("Location: AdminPage.php");
     exit();
 }
-?>

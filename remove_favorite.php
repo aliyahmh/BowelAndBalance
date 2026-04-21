@@ -31,4 +31,3 @@ if (isset($_GET['id']) && is_numeric($_GET['id']) && isset($_SESSION['userID']))
 // Redirect back to user's page
 header("Location: UserPage.php");
 exit();
-?>

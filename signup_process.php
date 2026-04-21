@@ -64,4 +64,3 @@ $_SESSION['userType'] = 'user';
 header("Location: UserPage.php");
 exit;
 
-?>

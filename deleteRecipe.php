@@ -68,4 +68,3 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 // Redirects to MyRecipe page
 header("Location: MyRecipe.php");
 exit(); 
-?>

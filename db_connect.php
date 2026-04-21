@@ -18,4 +18,4 @@ try {
 } catch (PDOException $ex) {
     die($ex->getMessage());
 }
-?>
+

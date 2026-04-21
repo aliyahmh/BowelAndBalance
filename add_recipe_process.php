@@ -112,4 +112,3 @@ try {
     $pdo->rollBack();
     echo "Error: " . $ex->getMessage();
 }
-?>
