@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 
 require_once 'db_connect.php';
@@ -47,6 +46,7 @@ try {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title> Bowl & Balance | Admin Dashboard</title>
         <link rel="stylesheet" href="MergedStyle.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
         <style>
             * {
                 box-sizing: border-box;
@@ -117,28 +117,28 @@ try {
                 <p>No pending reports at this time.</p>
             <?php else: ?>
                 <?php foreach ($reports as $report): ?>
-                    <div class="feed-item">
-                        <div class="recipe-details">
-                            <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
-                                <?php echo $report['recipeName']; ?>
-                            </a>
+                    <div class="feed-item" id="report-row-<?php echo $report['id']; ?>>
+                         <div class="recipe-details">
+                        <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
+                            <?php echo $report['recipeName']; ?>
+                        </a>
+                    </div>
+
+                    <div class="creator-info">
+                        <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
+                        <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
+                    </div>
+
+                    <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
+                        <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
+                        <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
+
+                        <div class="radio-group">
+                            <label><input type="radio" name="action" value="block" checked> Block User</label>
+                            <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
                         </div>
-
-                        <div class="creator-info">
-                            <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
-                            <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
-                        </div>
-
-                        <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
-                            <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
-                            <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
-
-                            <div class="radio-group">
-                                <label><input type="radio" name="action" value="block" checked> Block User</label>
-                                <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
-                            </div>
-                            <button type="submit" class="submit-btn">Submit Action</button>
-                        </form>
+                        <button type="submit" class="submit-btn">Submit Action</button>
+                    </form>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -191,19 +191,32 @@ try {
     </footer>
 
     <script>
-        function confirmAction(form) {
-            // Determine which radio button was selected
-            const action = form.querySelector('input[name="action"]:checked').value;
-
-            let message = "";
-            if (action === "block") {
-                message = "Are you sure you want to BLOCK this user? This will delete all their recipes and account data permanently.";
-            } else {
-                message = "Are you sure you want to DISMISS this report?";
-            }
-
-            // confirm() returns true if user clicks 'OK', false if they click 'Cancel'
-            return confirm(message);
+        function submitAjaxAction(button, reportRowId) {
+            const form = $(button).closest('form');
+            const action = form.find('input[name="action"]:checked').value;
+            // Confirmation
+            let message = (action === "block") ?
+                    "Are you sure you want to BLOCK this user?" :
+                    "Are you sure you want to DISMISS this report?";
+            if (!confirm(message))
+                return;
+            // Prepare data for AJAX
+            const formData = {
+                recipeID: form.find('input[name="recipeID"]').val(),
+                reportID: form.find('input[name="reportID"]').val(),
+                action: action
+            };
+            // Trigger AJAX request
+            $.post("handle_report.php", formData, function (response) {
+                // Check returned value; if successful, remove the row
+                if (response.trim() === "true") {
+                    $("#report-row-" + reportRowId).fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                } else {
+                    alert("Operation failed: " + response);
+                }
+            });
         }
     </script>
 </body>
