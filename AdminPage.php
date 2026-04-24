@@ -195,7 +195,7 @@ try {
             const form = $(button).closest('form');
             const action = form.find('input[name="action"]:checked').val();
 
-            // REQUIREMENT: Ask the admin if he is sure before the AJAX request
+            // Ask the admin if he is sure before the AJAX request
             let message = (action === "block") ?
                     "Are you sure you want to BLOCK this user?" :
                     "Are you sure you want to DISMISS this report?";
@@ -215,7 +215,7 @@ try {
             $.post("handle_report.php", formData, function (response) {
                 // Trim whitespace to ensure "true" matches correctly
                 if (response.trim() === "true") {
-                    // Remove the corresponding row in the HTML table [cite: 305]
+                    // Remove the corresponding row in the HTML table 
                     $("#report-row-" + reportRowId).fadeOut();
                 } else {
                     alert("Error from server: " + response);
