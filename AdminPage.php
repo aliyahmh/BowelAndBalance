@@ -212,14 +212,13 @@ try {
             };
 
             // AJAX request using jQuery $.post 
-            $.post("handle_report_ajax.php", formData, function (response) {
+            $.post("handle_report.php", formData, function (response) {
                 if (response.trim() === "true") {
                     // Remove the row that was just handled 
                     $("#report-row-" + reportRowId).fadeOut(500, function () {
                         $(this).remove();
 
                         // Check if there are any reports left in the container
-                        // We count how many '.feed-item' elements remain 
                         if ($(".feed-item").length === 0) {
                             // If zero, update the section with your "no reports" message 
                             $(".moderation-feed").html('<h2>Pending Recipe Reports</h2><p>No pending reports at this time.</p>');
