@@ -2,9 +2,16 @@
 session_start();
 require_once 'db_connect.php';
 
-// Authorization checks
-if (!isset($_SESSION['userID']) || $_SESSION['userType'] !== 'admin') {
-    die("false");
+// check if logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// check if  admin (not user)
+if ($_SESSION['userType'] !== 'admin') {
+    header("Location: index.php?error=unauthorized");
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,8 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Content-Type: text/plain"); 
         echo "true";
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($pdo->inTransaction()){
+            $pdo->rollBack();
+        }
         echo "false: " . $e->getMessage();
     }
 }
-?>

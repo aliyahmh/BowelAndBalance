@@ -117,28 +117,28 @@ try {
                 <p>No pending reports at this time.</p>
             <?php else: ?>
                 <?php foreach ($reports as $report): ?>
-                    <div class="feed-item" id="report-row-<?php echo $report['id']; ?>>
-                         <div class="recipe-details">
-                        <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
-                            <?php echo $report['recipeName']; ?>
-                        </a>
-                    </div>
-
-                    <div class="creator-info">
-                        <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
-                        <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
-                    </div>
-
-                    <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
-                        <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
-                        <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
-
-                        <div class="radio-group">
-                            <label><input type="radio" name="action" value="block" checked> Block User</label>
-                            <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
+                    <div class="feed-item"id="report-row-<?php echo $report['id']; ?>">
+                        <div class="recipe-details">
+                            <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
+                                <?php echo $report['recipeName']; ?>
+                            </a>
                         </div>
-                        <button type="submit" class="submit-btn">Submit Action</button>
-                    </form>
+
+                        <div class="creator-info">
+                            <img src="uploads/images/<?php echo $report['photoFileName']; ?>" alt="Creator Photo" class="avatar">
+                            <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
+                        </div>
+
+                        <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
+                            <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
+                            <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
+
+                            <div class="radio-group">
+                                <label><input type="radio" name="action" value="block" checked> Block User</label>
+                                <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
+                            </div>
+                            <button type="button" class="submit-btn" onclick="submitAjaxAction(this, <?php echo $report['id']; ?>)">Submit Action</button>
+                        </form>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -193,28 +193,32 @@ try {
     <script>
         function submitAjaxAction(button, reportRowId) {
             const form = $(button).closest('form');
-            const action = form.find('input[name="action"]:checked').value;
-            // Confirmation
+            const action = form.find('input[name="action"]:checked').val();
+
+            // REQUIREMENT: Ask the admin if he is sure before the AJAX request
             let message = (action === "block") ?
                     "Are you sure you want to BLOCK this user?" :
                     "Are you sure you want to DISMISS this report?";
-            if (!confirm(message))
+
+            // If the admin clicks "Cancel", stop everything here
+            if (!confirm(message)) {
                 return;
-            // Prepare data for AJAX
+            }
+
             const formData = {
                 recipeID: form.find('input[name="recipeID"]').val(),
                 reportID: form.find('input[name="reportID"]').val(),
                 action: action
             };
-            // Trigger AJAX request
+
+            // AJAX request using jQuery $.post [cite: 133, 176]
             $.post("handle_report.php", formData, function (response) {
-                // Check returned value; if successful, remove the row
+                // Trim whitespace to ensure "true" matches correctly
                 if (response.trim() === "true") {
-                    $("#report-row-" + reportRowId).fadeOut(500, function () {
-                        $(this).remove();
-                    });
+                    // Remove the corresponding row in the HTML table [cite: 305]
+                    $("#report-row-" + reportRowId).fadeOut();
                 } else {
-                    alert("Operation failed: " + response);
+                    alert("Error from server: " + response);
                 }
             });
         }
