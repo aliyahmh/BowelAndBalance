@@ -124,7 +124,7 @@ function getLikeCount(PDO $pdo, int $recipeID): int {
                             $instructions = $insStmt->fetchAll(PDO::FETCH_ASSOC);
                             ?>
 
-                            <tr>
+                            <tr id="recipe-row-<?= htmlspecialchars($recipeID) ?>">
 
                                 <!-- Recipe Name & Photo -->
                                 <td>
@@ -182,11 +182,11 @@ function getLikeCount(PDO $pdo, int $recipeID): int {
 
                                 <!-- Delete -->
                                 <td>
-                                    <a class="bd-delete-btn"
-                                       href="deleteRecipe.php?id=<?= htmlspecialchars($recipeID) ?>"
-                                       onclick="return confirm('Are you sure you want to delete this recipe?')">
+                                    <button type="button"
+                                            class="bd-delete-btn delete-recipe-btn"
+                                            data-id="<?= htmlspecialchars($recipeID) ?>">
                                         Delete
-                                    </a>
+                                    </button>
                                 </td>
 
                             </tr>
@@ -224,6 +224,42 @@ function getLikeCount(PDO $pdo, int $recipeID): int {
                 </div>
             </div>
         </footer>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+            $(document).ready(function () {
+
+                $(".delete-recipe-btn").click(function () {
+
+                    var recipeID = $(this).data("id");
+
+                    if (!confirm("Are you sure you want to delete this recipe?")) {
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "deleteRecipe.php",
+                        type: "POST",
+                        data: {id: recipeID},
+
+                        success: function (response) {
+                            if (response.trim() === "true") {
+                                $("#recipe-row-" + recipeID).remove();
+                            } else {
+                                alert("Could not delete the recipe.");
+                            }
+                        },
+
+                        error: function () {
+                            alert("AJAX request failed.");
+                        }
+                    });
+
+                });
+
+            });
+        </script>
 
     </body>
 
