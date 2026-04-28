@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 
 require_once 'db_connect.php';
@@ -47,6 +46,7 @@ try {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title> Bowl & Balance | Admin Dashboard</title>
         <link rel="stylesheet" href="MergedStyle.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
         <style>
             * {
                 box-sizing: border-box;
@@ -117,7 +117,7 @@ try {
                 <p>No pending reports at this time.</p>
             <?php else: ?>
                 <?php foreach ($reports as $report): ?>
-                    <div class="feed-item">
+                    <div class="feed-item"id="report-row-<?php echo $report['id']; ?>">
                         <div class="recipe-details">
                             <a href="ViewRecipe.php?id=<?php echo $report['recipeID']; ?>" class="recipe-link">
                                 <?php echo $report['recipeName']; ?>
@@ -137,7 +137,7 @@ try {
                                 <label><input type="radio" name="action" value="block" checked> Block User</label>
                                 <label><input type="radio" name="action" value="dismiss"> Dismiss</label>
                             </div>
-                            <button type="submit" class="submit-btn">Submit Action</button>
+                            <button type="button" class="submit-btn" onclick="submitAjaxAction(this, <?php echo $report['id']; ?>)">Submit Action</button>
                         </form>
                     </div>
                 <?php endforeach; ?>
@@ -191,19 +191,43 @@ try {
     </footer>
 
     <script>
-        function confirmAction(form) {
-            // Determine which radio button was selected
-            const action = form.querySelector('input[name="action"]:checked').value;
+        function submitAjaxAction(button, reportRowId) {
+            const form = $(button).closest('form');
+            const action = form.find('input[name="action"]:checked').val();
 
-            let message = "";
-            if (action === "block") {
-                message = "Are you sure you want to BLOCK this user? This will delete all their recipes and account data permanently.";
-            } else {
-                message = "Are you sure you want to DISMISS this report?";
+            // Ask the admin if he is sure before the AJAX request
+            let message = (action === "block") ?
+                    "Are you sure you want to BLOCK this user?" :
+                    "Are you sure you want to DISMISS this report?";
+
+            // If the admin clicks "Cancel", stop everything here
+            if (!confirm(message)) {
+                return;
             }
 
-            // confirm() returns true if user clicks 'OK', false if they click 'Cancel'
-            return confirm(message);
+            const formData = {
+                recipeID: form.find('input[name="recipeID"]').val(),
+                reportID: form.find('input[name="reportID"]').val(),
+                action: action
+            };
+
+            // AJAX request using jQuery $.post 
+            $.post("handle_report.php", formData, function (response) {
+                if (response.trim() === "true") {
+                    // Remove the row that was just handled 
+                    $("#report-row-" + reportRowId).fadeOut(500, function () {
+                        $(this).remove();
+
+                        // Check if there are any reports left in the container
+                        if ($(".feed-item").length === 0) {
+                            // If zero, update the section with your "no reports" message 
+                            $(".moderation-feed").html('<h2>Pending Recipe Reports</h2><p>No pending reports at this time.</p>');
+                        }
+                    });
+                } else {
+                    alert("Operation failed: " + response);
+                }
+            });
         }
     </script>
 </body>

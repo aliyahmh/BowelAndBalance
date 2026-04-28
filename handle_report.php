@@ -1,9 +1,6 @@
 <?php
-
 session_start();
-
-require_once 'db_connect.php'; 
-
+require_once 'db_connect.php';
 
 // check if logged in
 if (!isset($_SESSION['userID'])) {
@@ -17,52 +14,45 @@ if ($_SESSION['userType'] !== 'admin') {
     exit;
 }
 
-if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recipeID = $_POST['recipeID'];
     $reportID = $_POST['reportID'];
     $action = $_POST['action'];
 
-    if ($action === 'block') {
-        try {
-            // Identify the user who created the reported recipe
+    try {
+        if ($action === 'block') {
+            // Find creator
             $stmt = $pdo->prepare("SELECT userID FROM recipe WHERE id = ?");
             $stmt->execute([$recipeID]);
             $user = $stmt->fetch();
             $targetUID = $user['userID'];
 
-            // Fetch user details 
+            // Fetch details for blocked table
             $stmt = $pdo->prepare("SELECT firstName, lastName, emailAddress FROM user WHERE id = ?");
             $stmt->execute([$targetUID]);
             $uDetails = $stmt->fetch();
 
             $pdo->beginTransaction();
-
-            // Delete associated data
             $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
-            
-            // Delete all recipes belonging to this user 
             $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
-
-            // INSERT into blockeduser using YOUR exact columns: firstName, lastName, emailAddress
-            $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
-            $stmt->execute([
-                $uDetails['firstName'], 
-                $uDetails['lastName'], 
-                $uDetails['emailAddress']
-            ]);
-
-            // 6. Delete from main user table
-            $pdo->prepare("DELETE FROM user WHERE id = ?")->execute([$targetUID]);
             
-            $pdo->commit();
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            die("Transaction failed: " . $e->getMessage()); 
-        }
-    }
+            $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
+            $stmt->execute([$uDetails['firstName'], $uDetails['lastName'], $uDetails['emailAddress']]);
 
-    // 7. Delete the report and return to dashboard 
-    $pdo->prepare("DELETE FROM report WHERE id = ?")->execute([$reportID]);
-    header("Location: AdminPage.php");
-    exit();
+            $pdo->prepare("DELETE FROM user WHERE id = ?")->execute([$targetUID]);
+            $pdo->commit();
+        }
+
+        // Delete the report regardless of action
+        $pdo->prepare("DELETE FROM report WHERE id = ?")->execute([$reportID]);
+
+        // Return true to the AJAX call
+        header("Content-Type: text/plain"); 
+        echo "true";
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()){
+            $pdo->rollBack();
+        }
+        echo "false: " . $e->getMessage();
+    }
 }
