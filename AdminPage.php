@@ -129,7 +129,7 @@ try {
                             <span>By: <strong><?php echo $report['firstName'] . " " . $report['lastName']; ?></strong></span>
                         </div>
 
-                        <form action="handle_report.php" method="POST" class="action-form" onsubmit="return confirmAction(this);">
+                        <form action="handle_report.php" method="POST" class="action-form">
                             <input type="hidden" name="recipeID" value="<?php echo $report['recipeID']; ?>">
                             <input type="hidden" name="reportID" value="<?php echo $report['id']; ?>">
 
@@ -195,12 +195,12 @@ try {
             const form = $(button).closest('form');
             const action = form.find('input[name="action"]:checked').val();
 
-            // Ask the admin if he is sure before the AJAX request
+            // Confime action 
             let message = (action === "block") ?
                     "Are you sure you want to BLOCK this user?" :
                     "Are you sure you want to DISMISS this report?";
 
-            // If the admin clicks "Cancel", stop everything here
+            // Cancel
             if (!confirm(message)) {
                 return;
             }
@@ -211,16 +211,16 @@ try {
                 action: action
             };
 
-            // AJAX request using jQuery $.post 
+            
             $.post("handle_report.php", formData, function (response) {
                 if (response.trim() === "true") {
-                    // Remove the row that was just handled 
+                    // Remove the report row 
                     $("#report-row-" + reportRowId).fadeOut(500, function () {
                         $(this).remove();
 
-                        // Check if there are any reports left in the container
+                        
                         if ($(".feed-item").length === 0) {
-                            // If zero, update the section with your "no reports" message 
+                            
                             $(".moderation-feed").html('<h2>Pending Recipe Reports</h2><p>No pending reports at this time.</p>');
                         }
                     });
