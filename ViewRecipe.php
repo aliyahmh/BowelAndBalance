@@ -2,31 +2,27 @@
 session_start();
 require_once 'db_connect.php'; 
 
-// check if logged in
+// Check if logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
 
-
-
-//Check recipe ID from query string 
+// Check recipe ID from query string 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header("Location: MyRecipe.php"); // Redirecting if ID is invalid
+    header("Location: MyRecipe.php");
     exit();
 }
 
 $recipe_id = intval($_GET['id']);
-$user_id = $_SESSION['userID']; // Accessing session data 
+$user_id = $_SESSION['userID'];
 
 try {
     // Check if current viewer is Admin 
     $userTypeQuery = $pdo->prepare("SELECT userType FROM user WHERE id = ?");
     $userTypeQuery->execute([$user_id]);
     $current_user = $userTypeQuery->fetch();
-    $is_admin = ($current_user['userType'] === 'admin');
-
-    //Retrieve recipe and creator information using JOIN 
+    $is_admin = ($current_user && $current_user['userType'] === 'admin');
 
     $query = "SELECT r.*, u.firstName, u.lastName, u.photoFileName AS userPhoto, c.categoryName
               FROM recipe r
@@ -42,11 +38,9 @@ try {
         exit();
     }
 
-    // Logic for button visibility (Not creator and Not admin)
     $is_creator = ($recipe['userID'] == $user_id);
     $show_buttons = (!$is_creator && !$is_admin);
 
-    //Check status for disabling buttons 
     $liked_check = $pdo->prepare("SELECT 1 FROM likes WHERE userID = ? AND recipeID = ?");
     $liked_check->execute([$user_id, $recipe_id]);
     $has_liked = $liked_check->fetch() !== false;
@@ -59,28 +53,29 @@ try {
     $rep_check->execute([$user_id, $recipe_id]);
     $has_reported = $rep_check->fetch() !== false;
 
-    // Fetch total likes count 
     $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM likes WHERE recipeID = ?");
     $count_stmt->execute([$recipe_id]);
     $likes_count = $count_stmt->fetchColumn();
 } catch (PDOException $e) {
-    die("Database error: " . $e->getMessage());
+    die("Database error: " . htmlspecialchars($e->getMessage()));
 }
 ?>
 
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Bowl & Balance - <?php echo $recipe['name']; ?></title>
+        <title>Bowl & Balance - <?php echo htmlspecialchars($recipe['name']); ?></title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="MergedStyle.css"> <style>
+        <link rel="stylesheet" href="MergedStyle.css">
+        <style>
             body {
                 background-image: url('IMAGES/background.png');
                 background-attachment: fixed;
                 background-size: cover;
             }
         </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     </head>
 
     <body id="bg">
@@ -105,55 +100,52 @@ try {
             <div id="Sheet">
                 <div class="container">
                     <div class="flexRow">
-                        <h1 class="rname"><?php echo $recipe['name']; ?></h1>
-                        <img id="bowlImg" src="uploads/images/<?php echo $recipe['photoFileName']; ?>" alt="Recipe Image">
+                        <h1 class="rname"><?php echo htmlspecialchars($recipe['name']); ?></h1>
+                        <img id="bowlImg" src="uploads/images/<?php echo htmlspecialchars($recipe['photoFileName']); ?>" alt="Recipe Image">
                     </div>
 
                     <div class="flexRow">
-                        <h2>By <?php echo $recipe['firstName'] . ' ' . $recipe['lastName']; ?></h2>
+                        <h2>By <?php echo htmlspecialchars($recipe['firstName'] . ' ' . $recipe['lastName']); ?></h2>
 
                         <?php if ($show_buttons): ?>
                             <div class="interaction-buttons">
-                                <button id="fav" onclick="location.href = 'add_favourite.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_favourited) echo 'disabled'; ?>>
+                                <button id="fav" <?php if ($has_favourited) echo 'disabled'; ?>>
                                     <?php echo $has_favourited ? '⭐ Favourited' : '☆ Favourite'; ?>
                                 </button>
 
-                                <button id="like" onclick="location.href = 'add_like.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_liked) echo 'disabled'; ?>>
-                                    <?php echo $has_liked ? '❤️ Liked' : '🤍 Like'; ?> (<?php echo $likes_count; ?>)
+                                <button id="like" <?php if ($has_liked) echo 'disabled'; ?>>
+                                    <?php echo $has_liked ? '❤️ Liked' : '🤍 Like'; ?> (<span id="likes-count"><?php echo htmlspecialchars($likes_count); ?></span>)
                                 </button>
 
-                                <button id="report" onclick="if (confirm('Report this recipe?'))
-                                                location.href = 'add_report.php?id=<?php echo $recipe_id; ?>'" <?php if ($has_reported) echo 'disabled'; ?>>
-                                            <?php echo $has_reported ? '🚩 Already Reported' : '🚩 Report'; ?>
+                                <button id="report" <?php if ($has_reported) echo 'disabled'; ?>>
+                                    <?php echo $has_reported ? '🚩 Already Reported' : '🚩 Report'; ?>
                                 </button>
                             </div>
                         <?php endif; ?>
                     </div>
 
-                    <p class="rcategory"><?php echo $recipe['categoryName']; ?></p>
-                    <p class="rdescription"><?php echo $recipe['description']; ?></p>
+                    <p class="rcategory"><?php echo htmlspecialchars($recipe['categoryName']); ?></p>
+                    <p class="rdescription"><?php echo nl2br(htmlspecialchars($recipe['description'])); ?></p>
 
                     <h2 class="j-sectionHeader">Ingredients:</h2>
                     <ul class="j-sectionText" id="indent">
                         <?php
-// Fetch and loop through ingredients 
                         $ingredientsQuery = $pdo->prepare("SELECT ingredientName, ingredientQuantity FROM ingredients WHERE recipeID = ?");
                         $ingredientsQuery->execute([$recipe_id]);
                         while ($ingredient = $ingredientsQuery->fetch()):
-                            ?>
-                            <li><?php echo $ingredient['ingredientQuantity'] . " " . $ingredient['ingredientName']; ?></li>
+                        ?>
+                            <li><?php echo htmlspecialchars($ingredient['ingredientQuantity'] . " " . $ingredient['ingredientName']); ?></li>
                         <?php endwhile; ?>
                     </ul>
 
                     <h2 class="j-sectionHeader">Instructions:</h2>
                     <ol class="j-sectionText" id="indent2">
                         <?php
-                        // Fetch and loop through instructions 
                         $instructionsQuery = $pdo->prepare("SELECT step FROM instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
                         $instructionsQuery->execute([$recipe_id]);
                         while ($instruction = $instructionsQuery->fetch()):
-                            ?>
-                            <li><?php echo $instruction['step']; ?></li>
+                        ?>
+                            <li><?php echo htmlspecialchars($instruction['step']); ?></li>
                         <?php endwhile; ?>
                     </ol>
 
@@ -166,13 +158,12 @@ try {
 
                     <div id="comments">
                         <?php
-                        // Fetch and display comments 
                         $commentsQuery = $pdo->prepare("SELECT c.comment, c.date, u.firstName FROM comment c JOIN user u ON c.userID = u.id WHERE c.recipeID = ? ORDER BY c.date DESC");
                         $commentsQuery->execute([$recipe_id]);
                         while ($comment = $commentsQuery->fetch()):
-                            ?>
+                        ?>
                             <div class="flexRow comment-box">
-                                <p class="j-sectionText"><strong><?php echo $comment['firstName']; ?>:</strong> <?php echo $comment['comment']; ?></p>
+                                <p class="j-sectionText"><strong><?php echo htmlspecialchars($comment['firstName']); ?>:</strong> <?php echo htmlspecialchars($comment['comment']); ?></p>
                                 <span class="date"><?php echo date('d-m-Y', strtotime($comment['date'])); ?></span>
                             </div>
                         <?php endwhile; ?>
@@ -192,5 +183,60 @@ try {
                 </div>
             </div>
         </footer>
+
+        <script>
+    $(document).ready(function(){
+
+        var recipeId = <?php echo $recipe_id; ?>;
+
+        // Favourite button
+        $("#fav").click(function(){
+            var btn = this; // Use pure DOM element to access .disabled
+            
+            $.post("add_favourite.php", { id: recipeId }, function(data){
+                if (data == true) {
+                    btn.disabled = true;
+                    $(btn).html("⭐ Favourited");
+                }
+            }, "json");
+        });
+
+        // Like button
+        $("#like").click(function(){
+            var btn = this; // Use pure DOM element
+            
+            $.post("add_like.php", { id: recipeId }, function(data){
+                if (data == true) {
+                    btn.disabled = true;
+                    var count = parseInt($("#likes-count").text()) + 1;
+                    $("#likes-count").text(count);
+                    $(btn).html("❤️ Liked (<span id='likes-count'>" + count + "</span>)");
+                }
+            }, "json");
+        });
+
+        // Report button
+        $("#report").click(function(){
+            var btn = this; // Use pure DOM element
+            
+            // Only confirm if the button is not disabled
+            if (!btn.disabled) {
+                if (!confirm("Report this recipe?")) {
+                    return; 
+                }
+            } else {
+                return; 
+            }
+            
+            $.post("add_report.php", { id: recipeId }, function(data){
+                if (data == true) {
+                    btn.disabled = true;
+                    $(btn).html("🚩 Already Reported");
+                }
+            }, "json");
+        });
+
+    });
+</script>
     </body>
 </html>

@@ -2,23 +2,24 @@
 session_start();
 require_once 'db_connect.php';
 
-// check if logged in
+header('Content-Type: application/json');
+
 if (!isset($_SESSION['userID'])) {
-    header("Location: login.php");
+    echo json_encode(false); 
     exit;
 }
 
-// check if regular user 
-if ($_SESSION['userType'] !== 'user') {
-    header("Location: index.php?error=unauthorized");
+
+if (!isset($_SESSION['userType']) || $_SESSION['userType'] !== 'user') {
+    echo json_encode(false); 
     exit;
 }
 
-$recipe_id = $_GET['id'];
+$recipe_id = intval($_POST['id']);
 $user_id = $_SESSION['userID'];
 
 $sql = "INSERT IGNORE INTO report (userID, recipeID) VALUES (?, ?)";
-$pdo->prepare($sql)->execute([$user_id, $recipe_id]);
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$user_id, $recipe_id]);
 
-header("Location: ViewRecipe.php?id=" . $recipe_id);
-exit();
+echo json_encode($stmt->rowCount() > 0);
