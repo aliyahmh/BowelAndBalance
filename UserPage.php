@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once 'db_connect.php'; 
+require_once 'db_connect.php';
 
 // check if logged in
 if (!isset($_SESSION['userID'])) {
@@ -37,7 +37,7 @@ try {
     $totalLikes = $likesStmt->fetchColumn();
 
 // Retrieve favorites
-   $favStmt = $pdo->prepare("SELECT r.id, r.name, r.photoFileName, c.categoryName, 
+    $favStmt = $pdo->prepare("SELECT r.id, r.name, r.photoFileName, c.categoryName, 
                               COUNT(l.recipeID) AS recipeLikes
                               FROM favourites f 
                               JOIN recipe r ON f.recipeID = r.id 
@@ -171,9 +171,9 @@ try {
                                     <img src="uploads/images/<?php echo htmlspecialchars($fav['photoFileName']); ?>" alt="<?php echo htmlspecialchars($fav['name']); ?>" class="recipe-photo">
                                 </td>
                                 <td>
-                                    <a href="remove_favorite.php?id=<?php echo $fav['id']; ?>" 
+                                    <a href="#" 
                                        class="remove-link" 
-                                       onclick="return confirm('Remove this recipe from favorites?');">
+                                       data-id="<?php echo $fav['id']; ?>">
                                         Remove from Favorites
                                     </a>
                                 </td>
@@ -214,5 +214,46 @@ try {
         </div>
     </footer>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.remove-link').on('click', function(e) {
+            e.preventDefault();
+
+            if (!confirm('Remove this recipe from favorites?')) {
+                return;
+            }
+
+            var link = $(this);
+            var recipeID = link.data('id');
+            var row = link.closest('tr');
+
+            $.ajax({
+                url: 'remove_favorite.php',
+                type: 'GET',
+                data: { id: recipeID },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success === true) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                            // If no more favorites, show the empty message
+                            if ($('.favorites-table tbody tr').length === 0) {
+                                $('.favorites-table').replaceWith(
+                                    '<p id="bd-no-recipes-msg">You do not have any favorites yet. Start exploring recipes!</p>'
+                                );
+                            }
+                        });
+                    } else {
+                        alert('Failed to remove favorite. Please try again.');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>
