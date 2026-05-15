@@ -19,7 +19,7 @@ require_once 'db_connect.php';
 // Retrieve all recipes belonging to the logged-in user
 $userID = $_SESSION['userID'];
 
-$stmt = $pdo->prepare("SELECT * FROM Recipe WHERE userID = ?");
+$stmt = $pdo->prepare("SELECT * FROM recipe WHERE userID = ?");
 $stmt->execute([$userID]);
 $recipes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
