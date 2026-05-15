@@ -25,7 +25,7 @@ $recipes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Function to get the like count for a given recipe
 function getLikeCount(PDO $pdo, int $recipeID): int {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Likes WHERE recipeID = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM likes WHERE recipeID = ?");
     $stmt->execute([$recipeID]);
     return (int) $stmt->fetchColumn();
 }
@@ -114,12 +114,12 @@ function getLikeCount(PDO $pdo, int $recipeID): int {
                             $likeCount = getLikeCount($pdo, $recipeID);
 
                             // Fetch ingredients for this recipe
-                            $ingStmt = $pdo->prepare("SELECT * FROM Ingredients WHERE recipeID = ?");
+                            $ingStmt = $pdo->prepare("SELECT * FROM ingredients WHERE recipeID = ?");
                             $ingStmt->execute([$recipeID]);
                             $ingredients = $ingStmt->fetchAll(PDO::FETCH_ASSOC);
 
                             // Fetch instructions for this recipe
-                            $insStmt = $pdo->prepare("SELECT * FROM Instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
+                            $insStmt = $pdo->prepare("SELECT * FROM instructions WHERE recipeID = ? ORDER BY stepOrder ASC");
                             $insStmt->execute([$recipeID]);
                             $instructions = $insStmt->fetchAll(PDO::FETCH_ASSOC);
                             ?>

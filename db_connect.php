@@ -1,13 +1,13 @@
 <?php
 
-$host = "localhost";
-$db = "recipe_db";
+$host = "sql201.infinityfree.com";
+$db = "if0_41928799_recipe_db";
 
 try {
 
-    $connectionString = "mysql:host=$host;port=8889;dbname=$db";
-    $user = "root";
-    $pass = "root";
+    $connectionString = "mysql:host=$host;port=3306;dbname=$db";
+    $user = "if0_41928799";
+    $pass = "nLz2VTvUyZ3P";
     $pdo = new PDO($connectionString, $user, $pass);
     
     

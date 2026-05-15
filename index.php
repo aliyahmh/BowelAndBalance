@@ -27,7 +27,9 @@
         <nav class="home-head">
             <div class="home-head-container">
                 <div class="logo-area">
-                    <img src="IMAGES/logo.png" alt="Logo" class="main-logo">
+                    <a href="https://bowlandbalance.infinityfreeapp.com/BowlAndBalance/index.php">
+                        <img src="IMAGES/logo.png" alt="Logo" class="main-logo">
+                    </a>
                     <span class="app-name">Bowl & Balance</span>
                 </div>
 

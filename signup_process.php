@@ -13,7 +13,7 @@ $password  = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
 
 // checking if email is exists in the db
-$stmt = $pdo->prepare("SELECT id FROM User WHERE emailAddress = ?");
+$stmt = $pdo->prepare("SELECT id FROM user WHERE emailAddress = ?");
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
     header("Location: SignUp.php?error=email_exists"); // redirects the user with an error code in the URL
@@ -22,7 +22,7 @@ if ($stmt->fetch()) {
 
 
 // checking if user is blocked
-$stmt = $pdo->prepare("SELECT id FROM BlockedUser WHERE emailAddress = ?");
+$stmt = $pdo->prepare("SELECT id FROM blockeduser WHERE emailAddress = ?");
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
     header("Location: SignUp.php?error=email_blocked");
@@ -39,7 +39,7 @@ if (!empty($_FILES['photo']['name'])) {
 
 
 // inserting a new user (without pfp yet)
-$stmt = $pdo->prepare("INSERT INTO User (userType, firstName, lastName, emailAddress, password, photoFileName) 
+$stmt = $pdo->prepare("INSERT INTO user (userType, firstName, lastName, emailAddress, password, photoFileName) 
                         VALUES ('user', ?, ?, ?, ?, ?)");
 $stmt->execute([$firstName, $lastName, $email, $password, $photoFileName]);
 
@@ -52,7 +52,7 @@ if (!empty($_FILES['photo']['name'])) {
     move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/images/" . $photoFileName);
     
     // updating the user record with the real photo name
-    $stmt = $pdo->prepare("UPDATE User SET photoFileName = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE user SET photoFileName = ? WHERE id = ?");
     $stmt->execute([$photoFileName, $userID]);
 }
 

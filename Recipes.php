@@ -16,7 +16,7 @@ if ($_SESSION['userType'] !== 'user') {
 require_once 'db_connect.php';
 
 // Get all categories for the dropdown
-$catStmt = $pdo->query("SELECT id, categoryName FROM RecipeCategory");
+$catStmt = $pdo->query("SELECT id, categoryName FROM recipecategory");
 $categories = $catStmt->fetchAll();
 
 // Load all recipes when the page first opens (newest first)
@@ -26,10 +26,10 @@ $stmt = $pdo->prepare("
            CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
            u.photoFileName AS creatorPhoto,
            COUNT(l.recipeID) AS totalLikes
-    FROM Recipe r
-    JOIN RecipeCategory rc ON r.categoryID = rc.id
-    JOIN User u ON r.userID = u.id
-    LEFT JOIN Likes l ON l.recipeID = r.id
+    FROM recipe r
+    JOIN recipecategory rc ON r.categoryID = rc.id
+    JOIN user u ON r.userID = u.id
+    LEFT JOIN likes l ON l.recipeID = r.id
     GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName, u.photoFileName
     ORDER BY r.id DESC
 ");

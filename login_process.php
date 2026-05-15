@@ -6,7 +6,7 @@ $email    = $_POST['email'];
 $password = $_POST['password'];
 
 // checking if email belongs to a blocked user
-$stmt = $pdo->prepare("SELECT id FROM BlockedUser WHERE emailAddress = ?");
+$stmt = $pdo->prepare("SELECT id FROM blockeduser WHERE emailAddress = ?");
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
     header("Location: login.php?error=blocked");
@@ -14,7 +14,7 @@ if ($stmt->fetch()) {
 }
 
 // searching for a user with this email
-$stmt = $pdo->prepare("SELECT id, userType, password FROM User WHERE emailAddress = ?");
+$stmt = $pdo->prepare("SELECT id, userType, password FROM user WHERE emailAddress = ?");
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 

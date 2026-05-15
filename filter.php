@@ -31,14 +31,14 @@ if ($selectedCat === '') {
 
         (
             SELECT COUNT(*)
-            FROM Likes l
+            FROM likes l
             WHERE l.recipeID = r.id
         ) AS totalLikes
 
-    FROM Recipe r
+    FROM recipe r
 
-    JOIN RecipeCategory rc ON r.categoryID = rc.id
-    JOIN User u ON r.userID = u.id
+    JOIN recipecategory rc ON r.categoryID = rc.id
+    JOIN user u ON r.userID = u.id
 
     ORDER BY r.id DESC
 ");
@@ -58,14 +58,14 @@ if ($selectedCat === '') {
 
         (
             SELECT COUNT(*)
-            FROM Likes l
+            FROM likes l
             WHERE l.recipeID = r.id
         ) AS totalLikes
 
-    FROM Recipe r
+    FROM recipe r
 
-    JOIN RecipeCategory rc ON r.categoryID = rc.id
-    JOIN User u ON r.userID = u.id
+    JOIN recipecategory rc ON r.categoryID = rc.id
+    JOIN user u ON r.userID = u.id
 
     WHERE r.categoryID = :catID
 
