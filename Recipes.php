@@ -21,16 +21,21 @@ $categories = $catStmt->fetchAll();
 
 // Load all recipes when the page first opens (newest first)
 $stmt = $pdo->prepare("
-    SELECT r.id, r.name, r.photoFileName,
-           rc.categoryName,
-           CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
-           u.photoFileName AS creatorPhoto,
-           COUNT(l.recipeID) AS totalLikes
+    SELECT 
+        r.id,
+        r.name,
+        r.photoFileName,
+        rc.categoryName,
+        CONCAT(u.firstName, ' ', u.lastName) AS creatorName,
+        u.photoFileName AS creatorPhoto,
+        (
+            SELECT COUNT(*)
+            FROM likes l
+            WHERE l.recipeID = r.id
+        ) AS totalLikes
     FROM recipe r
     JOIN recipecategory rc ON r.categoryID = rc.id
     JOIN user u ON r.userID = u.id
-    LEFT JOIN likes l ON l.recipeID = r.id
-    GROUP BY r.id, r.name, r.photoFileName, rc.categoryName, u.firstName, u.lastName, u.photoFileName
     ORDER BY r.id DESC
 ");
 
@@ -244,7 +249,7 @@ $recipes = $stmt->fetchAll();
                                 return;
                             }
 
-                            // Build a card for each recipe and add it to the list
+                            // cards
                             $.each(response, function (i, recipe) {
 
                                 var card = '<article class="ar-item">' +
