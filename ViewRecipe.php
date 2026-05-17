@@ -191,7 +191,7 @@ try {
 
         // Favourite button
         $("#fav").click(function(){
-            var btn = this; // Use pure DOM element to access .disabled
+            var btn = this; 
             
             $.post("add_favourite.php", { id: recipeId }, function(data){
                 if (data == true) {
@@ -203,7 +203,7 @@ try {
 
         // Like button
         $("#like").click(function(){
-            var btn = this; // Use pure DOM element
+            var btn = this; 
             
             $.post("add_like.php", { id: recipeId }, function(data){
                 if (data == true) {
@@ -217,7 +217,7 @@ try {
 
         // Report button
         $("#report").click(function(){
-            var btn = this; // Use pure DOM element
+            var btn = this; 
             
             // Only confirm if the button is not disabled
             if (!btn.disabled) {
