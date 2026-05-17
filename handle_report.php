@@ -8,7 +8,7 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-// check if  admin (not user)
+// check if admin (not user)
 if ($_SESSION['userType'] !== 'admin') {
     header("Location: index.php?error=unauthorized");
     exit;
@@ -32,8 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$targetUID]);
             $uDetails = $stmt->fetch();
 
+            // Fetch ALL recipes belonging to this user to capture their media file names before deletion
+            $mediaStmt = $pdo->prepare("SELECT photoFileName, videoFilePath FROM recipe WHERE userID = ?");
+            $mediaStmt->execute([$targetUID]);
+            $userRecipes = $mediaStmt->fetchAll(PDO::FETCH_ASSOC);
+
             $pdo->beginTransaction();
+            
+            // Delete associated comments 
             $pdo->prepare("DELETE FROM comment WHERE recipeID = ?")->execute([$recipeID]);
+            
+            // Delete all recipes 
             $pdo->prepare("DELETE FROM recipe WHERE userID = ?")->execute([$targetUID]);
             
             $stmt = $pdo->prepare("INSERT INTO blockeduser (firstName, lastName, emailAddress) VALUES (?, ?, ?)");
@@ -41,6 +50,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->prepare("DELETE FROM user WHERE id = ?")->execute([$targetUID]);
             $pdo->commit();
+
+            // Clear physical files from the system after database transaction succeeds
+            foreach ($userRecipes as $recipe) {
+                // Handle Image File Deletion
+                if (!empty($recipe['photoFileName'])) {
+                    $photoTarget = "uploads/images/" . $recipe['photoFileName'];
+                    if (file_exists($photoTarget)) {
+                        unlink($photoTarget);
+                    }
+                }
+
+                // Handle Video File Deletion
+                if (!empty($recipe['videoFilePath'])) {
+                    if (!str_contains($recipe['videoFilePath'], 'http') && !str_contains($recipe['videoFilePath'], 'youtube')) {
+                        $videoTarget = "uploads/videos/" . $recipe['videoFilePath'];
+                        if (file_exists($videoTarget)) {
+                            unlink($videoTarget);
+                        }
+                    }
+                }
+            }
         }
 
         // Delete the report regardless of action

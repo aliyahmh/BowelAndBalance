@@ -75,4 +75,3 @@ try {
     echo "false";
     exit;
 }
-?>
