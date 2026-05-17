@@ -44,37 +44,48 @@ if ($categoryID === '' || !is_numeric($categoryID)) {
 $categoryID = (int) $categoryID;
 
 // file variables
-$photoFileName = null;
-$videoFilePath = null;
-
-// HANDLE IMAGE UPLOAD
-if (isset($_FILES['photoFile']) && $_FILES['photoFile']['error'] === 0) {
-    $photoFileName = time() . "_" . basename($_FILES['photoFile']['name']);
-    $target = "uploads/images/" . $photoFileName;
-    move_uploaded_file($_FILES['photoFile']['tmp_name'], $target);
-}
-
-// HANDLE VIDEO FILE UPLOAD
-if (isset($_FILES['videoFile']) && $_FILES['videoFile']['error'] === 0) {
-    $videoName = time() . "_" . basename($_FILES['videoFile']['name']);
-    $videoFilePath = "uploads/videos/" . $videoName;
-    move_uploaded_file($_FILES['videoFile']['tmp_name'], $videoFilePath);
-}
-// IF NO FILE, SAVE VIDEO URL
-elseif ($videoUrl !== '') {
-    $videoFilePath = $videoUrl;
-}
+$photoFileName = "";
+$videoFilePath = "";
 
 try {
     $pdo->beginTransaction();
 
-    // insert recipe
+    // insert recipe first without files, so we can get recipe ID
     $sql = "INSERT INTO recipe (userID, categoryID, name, description, photoFileName, videoFilePath)
             VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$userID, $categoryID, $name, $description, $photoFileName, $videoFilePath]);
 
     $recipeID = $pdo->lastInsertId();
+
+    // HANDLE IMAGE UPLOAD AFTER GETTING RECIPE ID
+    if (isset($_FILES['photoFile']) && $_FILES['photoFile']['error'] === 0) {
+        $photoExt = strtolower(pathinfo($_FILES['photoFile']['name'], PATHINFO_EXTENSION));
+        $photoFileName = "recipe_" . $recipeID . "_user_" . $userID . "_photo_" . time() . "." . $photoExt;
+
+        $photoTarget = "uploads/images/" . $photoFileName;
+        move_uploaded_file($_FILES['photoFile']['tmp_name'], $photoTarget);
+    }
+
+    // HANDLE VIDEO FILE UPLOAD AFTER GETTING RECIPE ID
+    if (isset($_FILES['videoFile']) && $_FILES['videoFile']['error'] === 0) {
+        $videoExt = strtolower(pathinfo($_FILES['videoFile']['name'], PATHINFO_EXTENSION));
+        $videoFilePath = "recipe_" . $recipeID . "_user_" . $userID . "_video_" . time() . "." . $videoExt;
+
+        $videoTarget = "uploads/videos/" . $videoFilePath;
+        move_uploaded_file($_FILES['videoFile']['tmp_name'], $videoTarget);
+    }
+    // IF NO FILE, SAVE VIDEO URL
+    elseif ($videoUrl !== '') {
+        $videoFilePath = $videoUrl;
+    }
+
+    // update recipe with file names only
+    $sqlUpdateFiles = "UPDATE recipe 
+                       SET photoFileName = ?, videoFilePath = ? 
+                       WHERE id = ? AND userID = ?";
+    $stmtUpdateFiles = $pdo->prepare($sqlUpdateFiles);
+    $stmtUpdateFiles->execute([$photoFileName, $videoFilePath, $recipeID, $userID]);
 
     // insert ingredients
     $sqlIng = "INSERT INTO ingredients (recipeID, ingredientName, ingredientQuantity)
@@ -109,6 +120,9 @@ try {
     exit;
 
 } catch (PDOException $ex) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     echo "Error: " . $ex->getMessage();
 }
+?>

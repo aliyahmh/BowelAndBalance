@@ -198,13 +198,22 @@ try {
   <div class="vid-right">
     <label class="currentVidLabel">Current Video:</label>
 
-    <?php if (!empty($recipe['videoFilePath'])): ?>
-      <video id="bd-videoPreview" controls style="display:block;">
-        <source src="<?php echo htmlspecialchars($recipe['videoFilePath']); ?>">
-      </video>
-    <?php else: ?>
-      <video id="bd-videoPreview" controls style="display:none;"></video>
-    <?php endif; ?>
+   <?php if (!empty($recipe['videoFilePath'])): ?>
+  <?php
+    if (filter_var($recipe['videoFilePath'], FILTER_VALIDATE_URL)) {
+        $videoSrc = $recipe['videoFilePath'];
+    } else {
+        $videoSrc = "uploads/videos/" . $recipe['videoFilePath'];
+    }
+  ?>
+
+  <video id="bd-videoPreview" controls style="display:block;">
+    <source src="<?php echo htmlspecialchars($videoSrc); ?>">
+  </video>
+<?php else: ?>
+  <video id="bd-videoPreview" controls style="display:none;"></video>
+<?php endif; ?>
+
   </div>
 </div>
 

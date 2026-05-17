@@ -71,7 +71,9 @@ try {
 
     // this part handles new photo upload
     if (isset($_FILES['photoFile']) && $_FILES['photoFile']['error'] === 0) {
-        $newPhotoFileName = time() . "_" . basename($_FILES['photoFile']['name']);
+        $photoExt = strtolower(pathinfo($_FILES['photoFile']['name'], PATHINFO_EXTENSION));
+        $newPhotoFileName = "recipe_" . $recipeID . "_user_" . $userID . "_photo_" . time() . "." . $photoExt;
+
         $photoTargetPath = "uploads/images/" . $newPhotoFileName;
 
         if (move_uploaded_file($_FILES['photoFile']['tmp_name'], $photoTargetPath)) {
@@ -86,13 +88,21 @@ try {
 
     // this part handles new video file upload
     if (isset($_FILES['videoFile']) && $_FILES['videoFile']['error'] === 0) {
-        $videoFileName = time() . "_" . basename($_FILES['videoFile']['name']);
-        $newVideoFilePath = "uploads/videos/" . $videoFileName;
+        $videoExt = strtolower(pathinfo($_FILES['videoFile']['name'], PATHINFO_EXTENSION));
+        $videoFileName = "recipe_" . $recipeID . "_user_" . $userID . "_video_" . time() . "." . $videoExt;
 
-        if (move_uploaded_file($_FILES['videoFile']['tmp_name'], $newVideoFilePath)) {
-            if (!empty($oldVideoFilePath) && str_starts_with($oldVideoFilePath, 'uploads/videos/') && file_exists($oldVideoFilePath)) {
-                unlink($oldVideoFilePath);
+        $videoTargetPath = "uploads/videos/" . $videoFileName;
+
+        if (move_uploaded_file($_FILES['videoFile']['tmp_name'], $videoTargetPath)) {
+            if (!empty($oldVideoFilePath) && !filter_var($oldVideoFilePath, FILTER_VALIDATE_URL)) {
+                $oldVideoPath = "uploads/videos/" . basename($oldVideoFilePath);
+                if (file_exists($oldVideoPath)) {
+                    unlink($oldVideoPath);
+                }
             }
+
+            // store only file name in database
+            $newVideoFilePath = $videoFileName;
         }
     }
     // if no new file but user entered a URL, save the URL
@@ -166,3 +176,4 @@ try {
     }
     die("Error: " . $ex->getMessage());
 }
+?>
